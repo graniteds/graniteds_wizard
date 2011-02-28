@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+	<extension 
+		point="org.eclipse.ui.newWizards">
+	    <category
+	        name="GraniteDS"
+	        id="org.granite.wizard">
+	    </category>
+	  	<wizard
+			id="org.granite.wizard.DynamicProjectWizard"
+			name="GraniteDS Projects"
+			class="org.granite.wizard.DynamicProjectWizard"
+			category="org.granite.wizard"
+			project="true"
+			icon="icons/gds16.gif">
+			<description>New GraniteDS Projects</description>
+	    </wizard>	 
+	  	<!--primaryWizard
+			id="org.granite.wizards.standard.NewProjectWizard"/-->	 
+	</extension>
+</plugin>
