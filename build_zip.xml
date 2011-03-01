@@ -41,6 +41,8 @@
 			<zipfileset dir="." prefix="${pluginDir}">
 				<include name="**"/>
 				<exclude name="*.zip"/>
+				<exclude name=".git/**"/>
+				<exclude name="**/.gitignore"/>
 			</zipfileset>
 		</zip>
 	</target>
