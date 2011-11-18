@@ -44,9 +44,9 @@ import org.granite.wizard.bindings.Variable;
  */
 public abstract class AbstractTemplateController {
 
-	private DynamicProjectWizard wizard;
-	private ProjectTemplate template;
-	private IWizardPage nextPage;
+	protected DynamicProjectWizard wizard;
+	protected ProjectTemplate template;
+	protected IWizardPage nextPage;
 
 	public DynamicProjectWizard getWizard() {
 		return wizard;
@@ -72,15 +72,16 @@ public abstract class AbstractTemplateController {
 		this.template = template;
 	}
 	
-	public void createProjectResources(IProject project, Bindings bindings, SubMonitor monitor) throws IOException {
+	public void createProjectResources(IProject project, File projectTemplateDirectory, SubMonitor monitor, Map<String, Object> variables) throws IOException {
 		File projectDir = new File(project.getLocationURI());
-		Map<String, Object> variables = bindings.getBindingMap();
-		variables.put("projectName", project.getName());
-		createProjectResources(projectDir, template.getProjectDirectory().toURI(), template.getProjectDirectory(), monitor, variables);
+		createProjectResources(projectDir, projectTemplateDirectory.toURI(), projectTemplateDirectory, monitor, variables);
 	}
 	
 	protected void createProjectResources(File projectDir, URI projectTemplateURI, File directory, SubMonitor monitor, Map<String, Object> variables) throws IOException {
 		for (File file : directory.listFiles()) {
+			
+			if (template.ignoreFile(file))
+				continue;
 			
 			String relativePath = projectTemplateURI.relativize(file.toURI()).getPath();
 			if (relativePath.contains("${"))

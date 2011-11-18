@@ -20,6 +20,9 @@
 
 package org.granite.wizard.controllers;
 
+import java.io.File;
+import java.util.Map;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -34,10 +37,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -162,9 +168,16 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 		            }
 		        });
 		        
-		        sc.setContent(composite);
 		        Point s = composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		        sc.setMinSize(s);
+		        sc.setContent(composite);
+
+		        final Button saveAsDefault = new Button(group, SWT.PUSH);
+		        saveAsDefault.setText("Save values as default");
+		        saveAsDefault.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+					}
+				});
 			}
 		};
 		projectPage.setInitialProjectName("");
@@ -190,52 +203,83 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 		if (!canFinish)
 			return false;
 		
-		final String projectName = projectPage.getProjectName();
-		final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-	    final IWorkingSet[] workingSets = projectPage.getSelectedWorkingSets();
-	    
-		Job job = new Job("Creating '" + projectName + "' project...") {
-			public IStatus run(IProgressMonitor monitor) {
-				
-				try {
-					SubMonitor sm = SubMonitor.convert(monitor);
+		final Map<String, Object> variables = bindings.getBindingMap();
+		variables.put("projectName", projectPage.getProjectName());
 
-					// create the project.
-					sm.setTaskName("Creating project...");
-					sm.setWorkRemaining(100);
-					project.create(sm.newChild(1));
-					project.open(sm.newChild(1));
-
-					// delete the .project file (must be in the template).
-					IFile projectFile = project.getFile(".project");
-					projectFile.delete(true, false, sm.newChild(1));
+		for (final File projectDirectory : template.getProjectDirectories()) {
+		
+			final String projectName = resolveVariables(projectDirectory.getName(), variables);
+			final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		    final IWorkingSet[] workingSets = projectPage.getSelectedWorkingSets();
+		    
+			Job job = new Job("Creating '" + projectName + "' project...") {
+				public IStatus run(IProgressMonitor monitor) {
 					
-					// create all resources for the project (including a new .project file).
-					createProjectResources(project, bindings, sm);
+					try {
+						SubMonitor sm = SubMonitor.convert(monitor);
+	
+						// create the project.
+						sm.setTaskName("Creating project...");
+						sm.setWorkRemaining(100);
+						project.create(sm.newChild(1));
+						project.open(sm.newChild(1));
+	
+						// delete the .project file (must be in the template).
+						IFile projectFile = project.getFile(".project");
+						projectFile.delete(true, false, sm.newChild(1));
+						
+						// create all resources for the project (including a new .project file).
+						createProjectResources(project, projectDirectory, sm, variables);
+	
+						// add project to selected workingsets.
+						sm.setWorkRemaining(10);
+						if (workingSets != null && workingSets.length > 0)
+							PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, workingSets);
+					}
+					catch(CoreException e) {
+						return e.getStatus();
+					}
+					catch(Exception e) {
+						return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not create project '" + projectName + "'", e);
+					}
 					
-					// refresh project resources.
-					sm.setTaskName("Refreshing project...");
-					sm.setWorkRemaining(10);
-					project.refreshLocal(IResource.DEPTH_INFINITE, sm.newChild(10));
+					return Status.OK_STATUS;
+		        }
+			};
+		    
+			job.setRule(project);
+		    job.schedule();
+		}
 
-					// add project to selected workingsets.
-					if (workingSets != null && workingSets.length > 0)
-						PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, workingSets);
-
-				}
-				catch(CoreException e) {
-					return e.getStatus();
-				}
-				catch(Exception e) {
-					return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not create project '" + projectName + "'", e);
-				}
-				
-				return Status.OK_STATUS;
-	        }
-		};
-	    
-		job.setRule(project);
-	    job.schedule();
+		for (final File projectDirectory : template.getProjectDirectories()) {
+		
+			final String projectName = resolveVariables(projectDirectory.getName(), variables);
+			final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		    
+			Job job = new Job("Refreshing '" + projectName + "' project...") {
+				public IStatus run(IProgressMonitor monitor) {
+					
+					try {
+						SubMonitor sm = SubMonitor.convert(monitor);
+						sm.setWorkRemaining(100);
+						project.refreshLocal(IResource.DEPTH_INFINITE, sm.newChild(10));
+						sm.setWorkRemaining(0);
+	
+					}
+					catch(CoreException e) {
+						return e.getStatus();
+					}
+					catch(Exception e) {
+						return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not create project '" + projectName + "'", e);
+					}
+					
+					return Status.OK_STATUS;
+		        }
+			};
+		    
+			job.setRule(project);
+		    job.schedule();
+		}
 
 //		IExtensionRegistry reg = RegistryFactory.getRegistry();
 //		IExtension fb = reg.getExtension("com.adobe.flexbuilder.project.flexbuilder");

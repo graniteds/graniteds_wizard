@@ -24,6 +24,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
@@ -35,6 +36,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.granite.generator.util.PropertiesUtil;
 import org.granite.wizard.controllers.AbstractTemplateController;
 
 /**
@@ -43,10 +45,12 @@ import org.granite.wizard.controllers.AbstractTemplateController;
 public class DynamicProjectWizardPageOne extends WizardPage {
 
 	private static final String TEMPLATES = "resources/templates";
+	private static final String TEMPLATES_PROPERTIES = "templates.properties";
 	
 	private IConfigurationElement configurationElement;
 	
 	private List<ProjectTemplate> templates = new ArrayList<ProjectTemplate>();	
+	private Properties properties;
 	
 	private AbstractTemplateController controller = null;
 	
@@ -74,6 +78,10 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 		return controller.getNextPage();
 	}
 
+	public Properties getProperties() {
+		return properties;
+	}
+
 	private void initialize() {
 		this.templates.clear();
 		
@@ -88,13 +96,17 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 		if (!templatesDirectory.isDirectory())
 			throw new WizardException("Not a directory: " + TEMPLATES, null);
 		
+		properties = PropertiesUtil.loadProperties(templatesDirectory, TEMPLATES_PROPERTIES);
+		
 		File[] templatesSubDirectories = templatesDirectory.listFiles();
 		for (File template : templatesSubDirectories) {
-			try {
-				this.templates.add(new ProjectTemplate(template));
-			}
-			catch (Exception e) {
-				Activator.log("Template loading error", e);
+			if (template.isDirectory() && !template.isHidden()) {
+				try {
+					this.templates.add(new ProjectTemplate(template, properties));
+				}
+				catch (Exception e) {
+					Activator.log("Template loading error", e);
+				}
 			}
 		}
 	}

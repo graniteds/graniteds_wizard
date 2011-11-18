@@ -21,12 +21,12 @@
 package org.granite.wizard;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileFilter;
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
+import org.granite.generator.util.PropertiesUtil;
 import org.granite.wizard.controllers.AbstractTemplateController;
 
 /**
@@ -36,7 +36,9 @@ public class ProjectTemplate {
 
 	private static final String BINDINGS_GROOVY = "bindings.groovy";
 	private static final String TEMPLATE_PROPERTIES = "template.properties";
-	private static final String PROJECT = "project";
+
+	private static final String IGNORE_FILES = "ignoreFiles";
+
 	private static final String NAME = "name";
 	private static final String CONTROLLER = "controller";	
 	private static final String TITLE = "title";
@@ -47,10 +49,17 @@ public class ProjectTemplate {
 	private final String name;
 	private final Class<? extends AbstractTemplateController> controller;
 	
+	private Pattern ignoreFiles = null;
+	
 	@SuppressWarnings("unchecked")
-	public ProjectTemplate(File directory) {
+	public ProjectTemplate(File directory, Properties globalProperties) {
 		this.directory = directory;
-		this.properties = loadTemplateProperties();
+		
+		String ignoreFiles = globalProperties.getProperty(IGNORE_FILES);
+		if (ignoreFiles!= null)
+			this.ignoreFiles = Pattern.compile(ignoreFiles);
+		
+		this.properties = PropertiesUtil.loadProperties(directory, TEMPLATE_PROPERTIES);
 		
 		this.name = properties.getProperty(NAME);
 		if (name == null || name.length() == 0)
@@ -67,56 +76,21 @@ public class ProjectTemplate {
 			throw new ProjectTemplateException("Cannot load controller class '" + controllerClassName + "' in: " + directory + "/" + TEMPLATE_PROPERTIES);
 		}
 	}
-	
-	private Properties loadTemplateProperties() {
-		if (!directory.isDirectory())
-			throw new ProjectTemplateException("Not a directory: " + directory);
-		
-		File[] propertiesList = directory.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return TEMPLATE_PROPERTIES.equals(name);
-			}
-		});
-		
-		if (propertiesList.length == 0)
-			throw new ProjectTemplateException("No " + TEMPLATE_PROPERTIES + " file in template directory: " + directory);
-		
-		Properties properties = new Properties();
-		InputStream is = null;
-		try {
-			is = new FileInputStream(propertiesList[0]);
-			properties.load(is);
-		}
-		catch (IOException e) {
-			throw new ProjectTemplateException("Cannot load " + TEMPLATE_PROPERTIES + " file in template directory: " + directory, e);
-		}
-		finally {
-			if (is != null) try {
-				is.close();
-			} catch (Exception e) {
-				// ignore...
-			}
-		}
-		
-		return properties;
-	}
 
 	public File getDirectory() {
 		return directory;
 	}
 	
-	public File getProjectDirectory() {
-		File[] files = directory.listFiles(new FilenameFilter() {
+	public File[] getProjectDirectories() {
+		File[] files = directory.listFiles(new FileFilter() {
+
 			@Override
-			public boolean accept(File dir, String name) {
-				return PROJECT.equals(name);
+			public boolean accept(File file) {
+				return file.isDirectory();
 			}
 		});
 		
-		if (files.length > 0 && files[0].isDirectory())
-			return files[0];
-		return null;
+		return (files.length > 0 ? files : null);
 	}
 	
 	public File getResourcesDirectory() {
@@ -160,5 +134,9 @@ public class ProjectTemplate {
 	public String getDescription() {
 		String description = properties.getProperty(DESCRIPTION);
 		return (description != null ? description : "");
+	}
+	
+	public boolean ignoreFile(File file) {
+		return (ignoreFiles != null ? ignoreFiles.matcher(file.getName()).matches() : false);
 	}
 }
