@@ -31,7 +31,7 @@ import org.granite.wizard.bindings.Variable;
  */
 public class Controls {
 	
-	public static AbstractControl<?> createControl(Composite parent, Variable variable) {
+	public static AbstractControl<?> createControl(Composite parent, int widthHint, Variable variable) {
 		
 		AbstractControl<?> control = null;
 		
@@ -48,7 +48,7 @@ public class Controls {
 			control = new UnknownControl(variable); break;
 		}
 		
-		control.createControl(parent);
+		control.createControl(parent, widthHint);
 		
 		return control;
 	}
@@ -60,7 +60,7 @@ public class Controls {
 		}
 
 		@Override
-		protected Label internalCreateControl(Composite parent) {
+		protected Label internalCreateControl(Composite parent, int widthHint) {
 			Label label = new Label(parent, SWT.NONE);
 			label.setText("Unknown control type: " + variable.getControlType().toString());
 			return label;

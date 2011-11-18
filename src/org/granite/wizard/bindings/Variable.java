@@ -71,8 +71,8 @@ public class Variable {
 		return control;
 	}
 	
-	public Control createControl(Composite parent) {
-		return (control = Controls.createControl(parent, this)).getControl();
+	public Control createControl(Composite parent, int widthHint) {
+		return (control = Controls.createControl(parent, widthHint, this)).getControl();
 	}
 	
 	public boolean isDisabled() {

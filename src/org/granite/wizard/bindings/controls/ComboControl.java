@@ -44,7 +44,7 @@ public class ComboControl extends AbstractControl<Combo> {
 	}
 
 	@Override
-	protected Combo internalCreateControl(Composite parent) {
+	protected Combo internalCreateControl(Composite parent, int widthHint) {
 		
 		final Combo combo = new Combo(parent, SWT.READ_ONLY);
 		Map<String, String> items = variable.getPossibleValues();

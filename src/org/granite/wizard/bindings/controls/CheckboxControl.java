@@ -41,7 +41,7 @@ public class CheckboxControl extends AbstractControl<Button> {
 	}
 
 	@Override
-	protected Button internalCreateControl(Composite parent) {
+	protected Button internalCreateControl(Composite parent, int widthHint) {
 		
 		final Button checkbox = new Button(parent, SWT.CHECK);
 		checkbox.setSelection(variable.getValueAsBoolean());

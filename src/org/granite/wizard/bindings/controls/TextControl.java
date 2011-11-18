@@ -23,6 +23,7 @@ package org.granite.wizard.bindings.controls;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
@@ -41,11 +42,14 @@ public class TextControl extends AbstractControl<Text> {
 	}
 
 	@Override
-	public Text internalCreateControl(Composite parent) {
+	public Text internalCreateControl(Composite parent, int widthHint) {
 
 		final Text text = new Text(parent, SWT.SINGLE | SWT.BORDER);
 		text.setText(variable.getValueAsString());
 		text.setEnabled(!variable.isDisabled());
+		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+		gridData.widthHint = widthHint;
+		text.setLayoutData(gridData);
 		
 		final ModifyListener modifyListener = new ModifyListener() {
 			@Override

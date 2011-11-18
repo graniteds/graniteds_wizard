@@ -49,7 +49,7 @@ public class DirectoryControl extends AbstractControl<Composite> {
 	}
 
 	@Override
-	protected Composite internalCreateControl(Composite parent) {
+	protected Composite internalCreateControl(Composite parent, int widthHint) {
 		
 		final Composite box = new Composite(parent, SWT.NONE);
 		GridLayout boxLayout = new GridLayout(2, false);
@@ -61,11 +61,14 @@ public class DirectoryControl extends AbstractControl<Composite> {
 		boxLayout.marginRight = 0;
 		boxLayout.marginTop = 0;
 		box.setLayout(boxLayout);
+		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+		gridData.widthHint = widthHint;
+		box.setLayoutData(gridData);
 		
 		boolean enabled = !variable.isDisabled();
 		
 		text = new Text(box, SWT.SINGLE | SWT.BORDER);
-		text.setLayoutData(new GridData(GridData.FILL_BOTH));
+		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		text.setText(variable.getValueAsString());
 		text.setEnabled(enabled);
 		final ModifyListener modifyListener = new ModifyListener() {

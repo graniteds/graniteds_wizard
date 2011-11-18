@@ -50,13 +50,13 @@ public abstract class AbstractControl<T extends Control> {
 		return control;
 	}
 	
-	public T createControl(Composite parent) {
-		control = internalCreateControl(parent);
+	public T createControl(Composite parent, int widthHint) {
+		control = internalCreateControl(parent, widthHint);
 		background = control.getBackground();
 		return control;
 	}
 	
-	protected abstract T internalCreateControl(Composite parent);
+	protected abstract T internalCreateControl(Composite parent, int widthHint);
 	
 	public abstract void displayError(ValidationException e);
 	

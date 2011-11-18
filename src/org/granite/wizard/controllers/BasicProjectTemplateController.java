@@ -37,13 +37,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -90,16 +86,6 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 				
 				Composite control = (Composite)getControl();
 				
-				boolean hasWorkingSetGroup = false;
-				IWorkingSet[] workingSets = wizard.getWorkbench().getWorkingSetManager().getWorkingSets();
-				if (workingSets != null && workingSets.length > 0) {
-					String[] workingSetIds = new String[workingSets.length];
-					for (int i = 0; i < workingSets.length; i++)
-						workingSetIds[i] = workingSets[i].getId();
-					createWorkingSetGroup(control, wizard.getSelection(), workingSetIds);
-					hasWorkingSetGroup = true;
-				}
-				
 				final Group group = new Group(control, SWT.NONE);
 				group.setText("Template variables");
 				group.setLayout(new GridLayout(1, false));
@@ -110,9 +96,7 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 		        sc.setExpandVertical(true);
 		        sc.getVerticalBar().setIncrement(20);
 		        sc.setMinSize(0, 0);
-		        GridData data = new GridData(GridData.FILL, GridData.FILL, true, true);
-				data.heightHint = (hasWorkingSetGroup ? 300 : 400);
-		        sc.setLayoutData(data);
+		        sc.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
 		 
 		        final Composite composite = new Composite(sc, SWT.NONE);
 		        GridLayout layout = new GridLayout();
@@ -121,12 +105,6 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 		        layout.horizontalSpacing = 10;
 		        composite.setLayout(layout);
 
-		        GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-		        GC gc = new GC(composite);
-		        gc.setFont(composite.getFont());
-		        gridData.heightHint = gc.stringExtent("A").y + 4;
-		        gc.dispose();
-		        
 		        final Listener validationListener = new Listener() {
 					@Override
 					public void handleEvent(Event e) {
@@ -145,9 +123,7 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 			            label.setFont(composite.getFont());
 			            label.setText(labelText + ":");
 			            
-			            Control variableControl = variable.createControl(composite);
-			            variableControl.setFont(composite.getFont());
-			            variableControl.setLayoutData(gridData);
+			            variable.createControl(composite, 200);
 		        	}
 		        }
 
@@ -168,16 +144,17 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 		            }
 		        });
 		        
-		        Point s = composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		        Point s = new Point(400, 300);
+		        composite.setSize(s);
 		        sc.setMinSize(s);
 		        sc.setContent(composite);
 
-		        final Button saveAsDefault = new Button(group, SWT.PUSH);
-		        saveAsDefault.setText("Save values as default");
-		        saveAsDefault.addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
-					}
-				});
+//		        final Button saveAsDefault = new Button(group, SWT.PUSH);
+//		        saveAsDefault.setText("Save values as default");
+//		        saveAsDefault.addSelectionListener(new SelectionAdapter() {
+//					public void widgetSelected(SelectionEvent e) {
+//					}
+//				});
 			}
 		};
 		projectPage.setInitialProjectName("");
