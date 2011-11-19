@@ -33,7 +33,6 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
-import org.granite.wizard.bindings.ValidationException;
 import org.granite.wizard.bindings.Variable;
 import org.granite.wizard.bindings.VariableChangeEvent;
 
@@ -118,17 +117,5 @@ public class DirectoryControl extends AbstractControl<Composite> {
 		});
 
 		return box;
-	}
-
-	@Override
-	public void displayError(ValidationException e) {
-		text.setBackground(ERROR_COLOR);
-		text.setToolTipText(e.getMessage());
-	}
-
-	@Override
-	public void resetError() {
-		text.setBackground(background);
-		text.setToolTipText("");
 	}
 }

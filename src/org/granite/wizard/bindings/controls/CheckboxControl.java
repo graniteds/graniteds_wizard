@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.granite.wizard.bindings.ValidationException;
 import org.granite.wizard.bindings.Variable;
 import org.granite.wizard.bindings.VariableChangeEvent;
 
@@ -73,17 +72,5 @@ public class CheckboxControl extends AbstractControl<Button> {
 		});
 
 		return checkbox;
-	}
-
-	@Override
-	public void displayError(ValidationException e) {
-		control.setBackground(ERROR_COLOR);
-		control.setToolTipText(e.getMessage());
-	}
-
-	@Override
-	public void resetError() {
-		control.setBackground(background);
-		control.setToolTipText("");
 	}
 }

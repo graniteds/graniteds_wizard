@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.granite.wizard.bindings.ValidationException;
 import org.granite.wizard.bindings.Variable;
 import org.granite.wizard.bindings.VariableChangeEvent;
 
@@ -90,17 +89,5 @@ public class ComboControl extends AbstractControl<Combo> {
 		});
 
 		return combo;
-	}
-
-	@Override
-	public void displayError(ValidationException e) {
-		control.setBackground(ERROR_COLOR);
-		control.setToolTipText(e.getMessage());
-	}
-
-	@Override
-	public void resetError() {
-		control.setBackground(ERROR_COLOR);
-		control.setToolTipText("");
 	}
 }

@@ -20,27 +20,17 @@
 
 package org.granite.wizard.bindings.controls;
 
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.PlatformUI;
-import org.granite.wizard.bindings.ValidationException;
 import org.granite.wizard.bindings.Variable;
 
 /**
  * @author Franck WOLFF
  */
 public abstract class AbstractControl<T extends Control> {
-	
-	protected static final Color ERROR_COLOR = new Color(
-		PlatformUI.getWorkbench().getDisplay(),
-		new RGB(0xff, 0x80, 0x80)
-	);
 
 	protected Variable variable;
 	protected T control;
-	protected Color background;
 
 	public AbstractControl(Variable variable) {
 		this.variable = variable;
@@ -52,13 +42,8 @@ public abstract class AbstractControl<T extends Control> {
 	
 	public T createControl(Composite parent, int widthHint) {
 		control = internalCreateControl(parent, widthHint);
-		background = control.getBackground();
 		return control;
 	}
 	
 	protected abstract T internalCreateControl(Composite parent, int widthHint);
-	
-	public abstract void displayError(ValidationException e);
-	
-	public abstract void resetError();
 }

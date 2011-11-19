@@ -23,7 +23,6 @@ package org.granite.wizard.bindings.controls;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.granite.wizard.bindings.ValidationException;
 import org.granite.wizard.bindings.Variable;
 
 /**
@@ -64,14 +63,6 @@ public class Controls {
 			Label label = new Label(parent, SWT.NONE);
 			label.setText("Unknown control type: " + variable.getControlType().toString());
 			return label;
-		}
-
-		@Override
-		public void displayError(ValidationException e) {
-		}
-
-		@Override
-		public void resetError() {
 		}
 	}
 }

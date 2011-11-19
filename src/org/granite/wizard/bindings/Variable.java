@@ -28,7 +28,6 @@ import java.util.Map;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Listener;
 import org.granite.wizard.bindings.controls.AbstractControl;
 import org.granite.wizard.bindings.controls.Controls;
 
@@ -41,7 +40,6 @@ public class Variable {
 	private final Map<String, Object> values;
 	
 	private boolean valid = true;
-	private Listener validationListener;
 
 	private AbstractControl<?> control;
 
@@ -61,10 +59,6 @@ public class Variable {
 	
 	public ControlType getControlType() {
 		return (ControlType)internalGet("controlType");
-	}
-	
-	public void setValidationListener(Listener validationListener) {
-		this.validationListener = validationListener;
 	}
 	
 	public AbstractControl<?> getControl() {
@@ -113,38 +107,30 @@ public class Variable {
 		return (Class<?>)internalGet("type");
 	}
 	
-	public boolean validate() {
+	public String validate() {
 		return validate(getValue());
 	}
 	
-	public boolean validate(Object value) {
+	public String validate(Object value) {
 		if (control == null || control.getControl() == null || control.getControl().isDisposed())
-			return true;
+			return null;
 		
-		control.resetError();
-		
-		ValidationException validationException = null;
+		String message = null;
 
 		if (!isDisabled()) {
 			try {
 				Object o = internalGet("validate", new Object[]{value});
-				if (o != null && !Boolean.parseBoolean(o.toString())) {
-					String message = getErrorMessage();
-					validationException = new ValidationException(message);
-				}
+				if (o != null && !Boolean.parseBoolean(o.toString()))
+					message = getErrorMessage();
 			}
-			catch (ValidationException e) {
-				validationException = e;
+			catch (Exception e) {
+				message = e.getMessage();
 			}
 		}
 		
-		if (validationException != null)
-			control.displayError(validationException);
+		valid = (message == null);
 		
-		if (validationListener != null)
-			validationListener.handleEvent(new ValidationEvent(this, validationException));
-		
-		return (valid = (validationException == null));
+		return message;
 	}
 	
 	public boolean isValid() {

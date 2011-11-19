@@ -37,9 +37,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
@@ -54,7 +57,6 @@ import org.granite.wizard.DynamicProjectWizard;
 import org.granite.wizard.ProjectTemplate;
 import org.granite.wizard.WizardException;
 import org.granite.wizard.bindings.Bindings;
-import org.granite.wizard.bindings.ValidationEvent;
 import org.granite.wizard.bindings.Variable;
 import org.granite.wizard.bindings.VariableChangeEvent;
 
@@ -81,42 +83,29 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 
 			@Override
 			public void createControl(Composite parent) {
-				
 				super.createControl(parent);
+				parent = (Composite)getControl();
 				
-				Composite control = (Composite)getControl();
-				
-				final Group group = new Group(control, SWT.NONE);
-				group.setText("Template variables");
+				final Group group = new Group(parent, SWT.SHADOW_ETCHED_IN);
+				group.setText("Project Configuration:");
 				group.setLayout(new GridLayout(1, false));
 				group.setLayoutData(new GridData(GridData.FILL_BOTH));
 				
-		        final ScrolledComposite sc = new ScrolledComposite(group, SWT.V_SCROLL);
-		        sc.setExpandHorizontal(true);
-		        sc.setExpandVertical(true);
-		        sc.getVerticalBar().setIncrement(20);
-		        sc.setMinSize(0, 0);
-		        sc.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
+		        final ScrolledComposite scrolled = new ScrolledComposite(group, SWT.V_SCROLL);
+		        scrolled.setExpandHorizontal(true);
+		        scrolled.setExpandVertical(true);
+		        scrolled.getVerticalBar().setIncrement(20);
+		        scrolled.setMinSize(0, 0);
+		        scrolled.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, true));
 		 
-		        final Composite composite = new Composite(sc, SWT.NONE);
+		        final Composite composite = new Composite(scrolled, SWT.NONE);
 		        GridLayout layout = new GridLayout();
 		        layout.numColumns = 2;
 		        layout.makeColumnsEqualWidth = false;
 		        layout.horizontalSpacing = 10;
 		        composite.setLayout(layout);
-
-		        final Listener validationListener = new Listener() {
-					@Override
-					public void handleEvent(Event e) {
-						ValidationEvent ve = (ValidationEvent)e;
-						if (isPageComplete() && ve.exception != null)
-							setErrorMessage("At least one template variable has an invalid value (see below)");
-					}
-				};
 		 
 		        for (Variable variable : bindings.getVariables()) {
-		        	variable.setValidationListener(validationListener);
-		        	
 		        	String labelText = variable.getLabel();
 		        	if (labelText != null) {
 			            Label label = new Label(composite, SWT.NONE);
@@ -130,31 +119,51 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 		        composite.addListener(VariableChangeEvent.ID, new Listener() {
 					@Override
 					public void handleEvent(Event e) {
-						if (isPageComplete())
-							setErrorMessage(null);
+						// Re-dispatch change event to all controls so they can update their
+						// values.
 						for (Control control : ((Composite)e.widget).getChildren())
 							control.notifyListeners(VariableChangeEvent.ID, e);
+						
+						// Validate all controls and update "Finish" button state.
+						boolean valid = validatePage();
+						setPageComplete(valid);
 					}
 				});
 		        
 		        composite.addControlListener(new ControlAdapter() {
 		            public void controlResized(ControlEvent e) {
 		                Point s = composite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		                sc.setMinSize(s);
+		                scrolled.setMinSize(s);
 		            }
 		        });
 		        
 		        Point s = new Point(400, 300);
 		        composite.setSize(s);
-		        sc.setMinSize(s);
-		        sc.setContent(composite);
+		        scrolled.setMinSize(s);
+		        scrolled.setContent(composite);
 
-//		        final Button saveAsDefault = new Button(group, SWT.PUSH);
-//		        saveAsDefault.setText("Save values as default");
-//		        saveAsDefault.addSelectionListener(new SelectionAdapter() {
-//					public void widgetSelected(SelectionEvent e) {
-//					}
-//				});
+		        final Button saveAsDefault = new Button(parent, SWT.PUSH);
+		        saveAsDefault.setText("Save values as default");
+		        saveAsDefault.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+					}
+				});
+			}
+
+			@Override
+			protected boolean validatePage() {
+				boolean valid = super.validatePage();
+				if (valid) {
+					for (Variable variable : bindings.getVariables()) {
+						String message = variable.validate();
+						if (message != null) {
+							setErrorMessage(variable.getLabel() + ": " + message);
+							valid = false;
+							break;
+						}
+					}
+				}
+				return valid;
 			}
 		};
 		projectPage.setInitialProjectName("");
@@ -174,10 +183,7 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 	@Override
 	public boolean performFinish() throws CoreException, InterruptedException {
 		
-		boolean canFinish = canFinish();
-		for (Variable variable : bindings.getVariables())
-			canFinish = variable.validate() && canFinish;
-		if (!canFinish)
+		if (!canFinish())
 			return false;
 		
 		final Map<String, Object> variables = bindings.getBindingMap();
