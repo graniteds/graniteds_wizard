@@ -8,7 +8,7 @@
 %><?xml version="1.0" encoding="UTF-8"?>
 
 <packages version="1.3">
-   <package name="${projectName}.ear" type="org.jboss.ide.eclipse.as.core.packages.earPackageType" todir="${jbossDeployDir.canonicalPath}" exploded="true" inWorkspace="false">
+   <package name="${projectName}.ear" type="org.jboss.ide.eclipse.as.core.packages.earPackageType" todir="${new File(jbossDir, jbossDeployDir).canonicalPath}" exploded="true" inWorkspace="false">
       <package name="${projectName}.war" type="org.jboss.ide.eclipse.as.core.packages.warPackage" exploded="true" inWorkspace="true">
          <fileset dir="ear/war" includes="**" inWorkspace="true" flatten="false">
             <properties></properties>

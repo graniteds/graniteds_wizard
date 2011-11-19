@@ -11,10 +11,10 @@ jbossDir = [
 ]
 jbossDeployDir = [
 	label: "JBoss deploy directory",
-	controlType: ControlType.DIRECTORY,
-	type: File.class,
-	value: { new File(jbossDir.value, "server/default/deploy") },
-	validate: { value -> value instanceof File && value.isDirectory() },
+	controlType: ControlType.TEXT,
+	type: String.class,
+	value: "server/default/deploy",
+	validate: { value -> new File(jbossDir.value, value).isDirectory() },
 	errorMessage: "Must be a valid directory" 
 ]
 flexBuilder = [
