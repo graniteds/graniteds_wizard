@@ -40,16 +40,6 @@ antBuild = [
 	type: Boolean.class,
 	value: true
 ]
-deployDir = [
-	label: "Deployement directory",
-	tooltip: "Directory where the WAR file will be deployed",
-	controlType: ControlType.DIRECTORY,
-	type: File.class,
-	disabled: { !antBuild.value },	
-	value: "/path/to/as/deploy",
-	validate: { value -> value.isDirectory() },
-	errorMessage: "Must be a valid directory"
-]
 flexSdkDir = [
 	label: "Flex SDK directory",
 	tooltip: "Root directory of the Flex SDK used when compiling Flex sources without Flash Builder",
@@ -57,6 +47,26 @@ flexSdkDir = [
 	type: File.class,
 	disabled: { !antBuild.value },	
 	value: "/path/to/flex_sdk_4",
+	validate: { value -> value.isDirectory() },
+	errorMessage: "Must be a valid directory"
+]
+buildDir = [
+	label: "Build directory",
+	tooltip: "Directory where the WAR file will be created (relative to the project directory)",
+	controlType: ControlType.TEXT,
+	type: String.class,
+	disabled: { !antBuild.value },	
+	value: "build",
+	validate: { value -> value != null && value.matches("^[a-zA-Z0-9_\\-]+\$") },
+	errorMessage: "Must be a valid directory name"
+]
+deployDir = [
+	label: "Deployement directory",
+	tooltip: "Directory where the WAR file will be deployed",
+	controlType: ControlType.DIRECTORY,
+	type: File.class,
+	disabled: { !antBuild.value },	
+	value: "/path/to/as/deploy",
 	validate: { value -> value.isDirectory() },
 	errorMessage: "Must be a valid directory"
 ]

@@ -11,7 +11,7 @@
 	 !-->
 	<property file="env.properties"/>
 
-	<property name="war.dir" value="\${build.dir}/${projectName}"/>
+	<property name="war.dir" value="\${build.dir}/\${project.name}"/>
 	
 	<!--
 	 ! Build WAR.
@@ -31,6 +31,17 @@
 	</target>
 	
 	<!--
+	 ! Deploy WAR.
+	 !-->
+	<target name="deploy.war" depends="build.war">
+
+		<copy todir="\${deploy.dir}">
+			<fileset dir="\${build.dir}" includes="\${project.name}.war"/>
+		</copy>
+		
+	</target>
+	
+	<!--
 	 ! Compile Flex sources and create a HTML wrapper.
 	 !-->	
 	<target name="build.flex">
@@ -40,10 +51,10 @@
 		
 		<mkdir dir="\${flex.bin.dir}"/>
 		<mxmlc
-            file="\${flex.src.dir}/${projectName}.mxml"
-            output="\${flex.bin.dir}/${projectName}.swf"
+            file="\${flex.src.dir}/\${project.name}.mxml"
+            output="\${flex.bin.dir}/\${project.name}.swf"
             services="war/WEB-INF/flex/services-config.xml"
-            context-root="/${projectName}"
+            context-root="/\${project.name}"
             keep-generated-actionscript="false"
             debug="false"
             incremental="true"
@@ -64,10 +75,10 @@
         </mxmlc>
 
 		<html-wrapper
-			title="${projectName}"
+			title="\${project.name}"
 		    output="\${flex.bin.dir}"
-			file="${projectName}.html"
-		    application="${projectName}"
+			file="\${project.name}.html"
+		    application="\${project.name}"
 		    swf="${projectName}"
 		    version-major="10"
 		    version-minor="0"
@@ -77,6 +88,7 @@
 			width="100%"
 		    bgcolor="#ffffff"
 		/>
+
 	</target>
 
 </project>

@@ -2,9 +2,10 @@
 	if (!antBuild)
 		throw new org.granite.wizard.CancelFileGenerationException();
 
-%>flex.home = ${flexSdkDir}
+%>project.name = ${projectName}
+flex.home = ${flexSdkDir}
 flex.src.dir = ${flexSrcDir}
 flex.bin.dir = ${flexBinDir}
-build.dir = build
+build.dir = ${buildDir}
 deploy.dir = ${deployDir}
 
