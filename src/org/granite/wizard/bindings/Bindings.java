@@ -30,20 +30,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.runtime.InvokerHelper;
+import org.granite.generator.util.PropertiesUtil;
 
 /**
  * @author Franck WOLFF
  */
 public class Bindings {
 
+	private static final String DEFAULT_PROPERTIES = "default.properties";
+	
+	private final File source;
 	private final List<Variable> variables;
 	private final Map<String, Map<String, Object>> variablesMap;
 	
 	@SuppressWarnings("unchecked")
 	public Bindings(File source) throws CompilationFailedException, IOException {
+		
+		this.source = source;
 		
 		GroovyShell shell = new GroovyShell(getClass().getClassLoader());
 		Script script = shell.parse(source);
@@ -52,9 +59,10 @@ public class Bindings {
 		
 		this.variablesMap = scriptInstance.getBinding().getVariables();
 		
+		Properties defaultProperties = loadDefaultProperties();
 		this.variables = new ArrayList<Variable>();
 		for (Map.Entry<String, Map<String, Object>> entry : variablesMap.entrySet()) {
-			Variable variable = new Variable(entry.getKey(), entry.getValue());
+			Variable variable = new Variable(scriptInstance.getBinding(), entry.getKey(), defaultProperties.getProperty(entry.getKey()));
 			variables.add(variable);
 		}
 	}
@@ -76,5 +84,21 @@ public class Bindings {
 		for (Variable variable : variables)
 			map.put(variable.getName(), variable.getValue());
 		return map;
+	}
+	
+	public void saveDefaultProperties() {
+		Properties defaultProperties = new Properties();
+		for (Variable variable : variables)
+			defaultProperties.put(variable.getName(), variable.getValueAsString());
+		PropertiesUtil.saveProperties(defaultProperties, source.getParentFile(), DEFAULT_PROPERTIES);
+	}
+	
+	private Properties loadDefaultProperties() {
+		try {
+			return PropertiesUtil.loadProperties(source.getParentFile(), DEFAULT_PROPERTIES);
+		}
+		catch (Exception e) {
+			return new Properties();
+		}
 	}
 }

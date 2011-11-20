@@ -41,8 +41,8 @@ flexSdkDir = [
 	controlType: ControlType.DIRECTORY,
 	type: File.class,
 	disabled: { !antBuild.value },	
-	value: new File("/FlexSDK4"),
-	validate: { value -> value instanceof File && value.isDirectory() },
+	value: "/flex_sdk_4",
+	validate: { value -> value.isDirectory() },
 	errorMessage: "Must be a valid directory"
 ]
 flexBuilder = [

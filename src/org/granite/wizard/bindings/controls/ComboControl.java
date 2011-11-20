@@ -50,7 +50,7 @@ public class ComboControl extends AbstractControl<Combo> {
 		String[] labels = items.keySet().toArray(new String[0]);
 		String[] values = items.values().toArray(new String[0]);
 		combo.setItems(labels);
-		combo.select(Arrays.binarySearch(values, variable.getValueAsString()));
+		combo.select(indexOf(values, variable.getValueAsString()));
 		combo.setEnabled(!variable.isDisabled());
 		
 		final SelectionAdapter modifyListener = new SelectionAdapter() {
@@ -79,15 +79,28 @@ public class ComboControl extends AbstractControl<Combo> {
 				}
 
 				String value = variable.getValueAsString();
-				if (!items.get(combo.getText()).equals(value)) {
+				if (value != null && !value.equals(items.get(combo.getText()))) {
 					String[] values = items.values().toArray(new String[0]);
 					combo.removeSelectionListener(modifyListener);
-					combo.select(Arrays.binarySearch(values, variable.getValueAsString()));
+					combo.select(indexOf(values, variable.getValueAsString()));
 					combo.addSelectionListener(modifyListener);
 				}
 			}
 		});
 
 		return combo;
+	}
+	
+	private static int indexOf(String[] values, String value) {
+		int selected = -1;
+		if (value != null) {
+			for (int i = 0; i < values.length; i++) {
+				if (value.equals(values[i])) {
+					selected = i;
+					break;
+				}
+			}
+		}
+		return selected;
 	}
 }

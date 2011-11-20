@@ -5,8 +5,8 @@ jbossDir = [
 	label: "JBoss installation directory",
 	controlType: ControlType.DIRECTORY,
 	type: File.class,
-	value: new File("/Users/Franck/Desktop/jboss-5.1.0.GA"),
-	validate: { value -> value instanceof File && value.isDirectory() },
+	value: "/jboss-5.1.0.GA",
+	validate: { value -> value.isDirectory() },
 	errorMessage: "Must be a valid directory"
 ]
 jbossDeployDir = [
@@ -26,7 +26,7 @@ flexBuilder = [
 ]
 /*
 antBuildFile = [
-	label: "Create a Ant build file",
+	label: "Create an Ant build file",
 	controlType: ControlType.CHECKBOX,
 	type: Boolean.class,
 	value: false
@@ -35,9 +35,9 @@ flexSdkDir = [
 	label: "Flex SDK directory",
 	controlType: ControlType.DIRECTORY,
 	type: File.class,
-	value: new File("/"),
+	value: "/flex_sdk_4",
 	disabled: { !antBuildFile.value },
-	validate: { value -> value instanceof File && value.isDirectory() },
+	validate: { value -> value.isDirectory() },
 	errorMessage: "Must be a valid directory" 
 ]
 */
@@ -53,7 +53,7 @@ graniteBuilderPatterns = [
 	controlType: ControlType.TEXT,
 	type: String.class,
 	disabled: { !graniteBuilder.value },
-	value: "**/*.java"
+	value: "**/entities/*.java;**/services/*.java"
 ]
 gravityEnabled = [
 	label: "Configure Gravity",

@@ -143,9 +143,10 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 		        scrolled.setContent(composite);
 
 		        final Button saveAsDefault = new Button(parent, SWT.PUSH);
-		        saveAsDefault.setText("Save values as default");
+		        saveAsDefault.setText("Save as default");
 		        saveAsDefault.addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
+					public void widgetSelected(SelectionEvent event) {
+						bindings.saveDefaultProperties();
 					}
 				});
 			}

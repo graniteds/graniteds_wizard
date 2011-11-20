@@ -20,6 +20,7 @@
 
 package org.granite.wizard.bindings;
 
+import groovy.lang.Binding;
 import groovy.lang.Closure;
 
 import java.io.File;
@@ -36,18 +37,32 @@ import org.granite.wizard.bindings.controls.Controls;
  */
 public class Variable {
 	
+	private final Binding binding;
 	private final String name;
 	private final Map<String, Object> values;
-	
-	private boolean valid = true;
 
 	private AbstractControl<?> control;
-
-	public Variable(String name, Map<String, Object> values) {
+	
+	@SuppressWarnings("unchecked")
+	public Variable(Binding binding, String name, String storedValue) {
+		this.binding = binding;
 		this.name = name;
-		this.values = values;
+		this.values = (Map<String, Object>)binding.getVariable(name);
+		
+		if (storedValue != null) {
+			try {
+				internalSet("value", convert(storedValue));
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
+	public Binding getBinding() {
+		return binding;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -81,11 +96,10 @@ public class Variable {
 	
 	public Object getValue() {
 		Object value = internalGet("value");
-		validate(value);
-		return value;
+		return convert(value);
 	}
 	public void setValue(Object value) {
-		internalSet("value", value, true);
+		internalSet("value", convert(value));
 	}
 	
 	public String getValueAsString() {
@@ -128,27 +142,14 @@ public class Variable {
 			}
 		}
 		
-		valid = (message == null);
-		
 		return message;
-	}
-	
-	public boolean isValid() {
-		return valid;
 	}
 
 	public String getErrorMessage() {
 		return (String)internalGet("errorMessage");
 	}
 	
-	private void internalSet(String name, Object value, boolean validate) {
-
-		Class<?> type = getType();
-		if (type == File.class)
-			value = new File(value != null ? value.toString() : "");
-		else if (type == Boolean.class)
-			value = Boolean.valueOf(value != null ? value.toString() : "false");
-		
+	private void internalSet(String name, Object value) {
 		Object previousValue = values.get(name);
 		if (previousValue instanceof Closure) {
 			if (previousValue instanceof MockClosure) {
@@ -159,9 +160,6 @@ public class Variable {
 				value = new MockClosure((Closure)previousValue, value);
 		}
 		values.put(name, value);
-
-		if (validate)
-			validate(value);
 	}
 
 	private Object internalGet(String name) {
@@ -174,6 +172,21 @@ public class Variable {
 				value = ((Closure)value).call(params);
 			else
 				value = ((Closure)value).call();
+		}
+		return value;
+	}
+	
+	private Object convert(Object value) {
+		Class<?> type = getType();
+		if (!type.isInstance(value)) {
+			if (type == File.class)
+				value = new File(value != null ? value.toString() : "");
+			else if (type == Boolean.class)
+				value = Boolean.valueOf(value != null ? value.toString() : "false");
+			else if (type == String.class)
+				value = (value != null ? value : "");
+			else
+				throw new UnsupportedOperationException("Cannot convert " + value + " to " + type);
 		}
 		return value;
 	}
