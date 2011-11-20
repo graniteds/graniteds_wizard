@@ -46,12 +46,14 @@ public class ComboControl extends AbstractControl<Combo> {
 	protected Combo internalCreateControl(Composite parent, int widthHint) {
 		
 		final Combo combo = new Combo(parent, SWT.READ_ONLY);
+		final boolean enabled = !variable.isDisabled();
 		Map<String, String> items = variable.getPossibleValues();
 		String[] labels = items.keySet().toArray(new String[0]);
 		String[] values = items.values().toArray(new String[0]);
 		combo.setItems(labels);
 		combo.select(indexOf(values, variable.getValueAsString()));
-		combo.setEnabled(!variable.isDisabled());
+		combo.setEnabled(enabled);
+		setLabelEnabled(enabled);
 		
 		final SelectionAdapter modifyListener = new SelectionAdapter() {
 			@Override
@@ -68,7 +70,9 @@ public class ComboControl extends AbstractControl<Combo> {
 				if (((VariableChangeEvent)e).source == combo)
 					return;
 				
-				combo.setEnabled(!variable.isDisabled());
+				final boolean enabled = !variable.isDisabled();
+				combo.setEnabled(enabled);
+				setLabelEnabled(enabled);
 				
 				Map<String, String> items = variable.getPossibleValues();
 				String[] labels = items.keySet().toArray(new String[0]);

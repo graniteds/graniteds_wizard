@@ -44,11 +44,13 @@ public class TextControl extends AbstractControl<Text> {
 	protected Text internalCreateControl(Composite parent, int widthHint) {
 
 		final Text text = new Text(parent, SWT.SINGLE | SWT.BORDER);
+		final boolean enabled = !variable.isDisabled();
 		text.setText(variable.getValueAsString());
-		text.setEnabled(!variable.isDisabled());
 		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
 		gridData.widthHint = widthHint;
 		text.setLayoutData(gridData);
+		text.setEnabled(enabled);
+		setLabelEnabled(enabled);
 		
 		final ModifyListener modifyListener = new ModifyListener() {
 			@Override
@@ -66,7 +68,9 @@ public class TextControl extends AbstractControl<Text> {
 				if (((VariableChangeEvent)e).source == text)
 					return;
 				
-				text.setEnabled(!variable.isDisabled());
+				final boolean enabled = !variable.isDisabled();
+				text.setEnabled(enabled);
+				setLabelEnabled(enabled);
 				String value = variable.getValueAsString();
 				if (!text.getText().equals(value)) {
 					text.removeModifyListener(modifyListener);

@@ -33,6 +33,14 @@ flexBinDir = [
 	validate: { value -> value != null && value.matches("^[a-zA-Z0-9_\\-]+\$") },
 	errorMessage: "Must be a valid directory name"
 ]
+flexBuilder = [
+	label: "Configure Flash Builder",
+	tooltip: "Create Flash Builder configuration files and add Flex nature and builder",
+	controlType: ControlType.CHECKBOX,
+	type: Boolean.class,
+	disabled: !Eclipse.hasExtension("com.adobe.flexbuilder.project.flexbuilder"),
+	value: Eclipse.hasExtension("com.adobe.flexbuilder.project.flexbuilder")
+]
 antBuild = [
 	label: "Create an Ant build file",
 	tooltip: "Should we create a build.xml file (Flex compilation, WAR archive, deployment configuration)?",
@@ -41,7 +49,7 @@ antBuild = [
 	value: true
 ]
 flexSdkDir = [
-	label: "Flex SDK directory",
+	label: "|- Flex SDK directory",
 	tooltip: "Root directory of the Flex SDK used when compiling Flex sources without Flash Builder",
 	controlType: ControlType.DIRECTORY,
 	type: File.class,
@@ -51,7 +59,7 @@ flexSdkDir = [
 	errorMessage: "Must be a valid directory"
 ]
 buildDir = [
-	label: "Build directory",
+	label: "|- Build directory",
 	tooltip: "Directory where the WAR file will be created (relative to the project directory)",
 	controlType: ControlType.TEXT,
 	type: String.class,
@@ -61,7 +69,7 @@ buildDir = [
 	errorMessage: "Must be a valid directory name"
 ]
 deployDir = [
-	label: "Deployement directory",
+	label: "|- Deployement directory",
 	tooltip: "Directory where the WAR file will be deployed",
 	controlType: ControlType.DIRECTORY,
 	type: File.class,
@@ -69,12 +77,4 @@ deployDir = [
 	value: "/path/to/as/deploy",
 	validate: { value -> value.isDirectory() },
 	errorMessage: "Must be a valid directory"
-]
-flexBuilder = [
-	label: "Configure Flash Builder",
-	tooltip: "Create Flash Builder configuration files and add Flex nature and builder",
-	controlType: ControlType.CHECKBOX,
-	type: Boolean.class,
-	disabled: !Eclipse.hasExtension("com.adobe.flexbuilder.project.flexbuilder"),
-	value: Eclipse.hasExtension("com.adobe.flexbuilder.project.flexbuilder")
 ]

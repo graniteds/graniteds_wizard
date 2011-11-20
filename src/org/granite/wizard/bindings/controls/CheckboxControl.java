@@ -43,8 +43,10 @@ public class CheckboxControl extends AbstractControl<Button> {
 	protected Button internalCreateControl(Composite parent, int widthHint) {
 		
 		final Button checkbox = new Button(parent, SWT.CHECK);
+		final boolean enabled = !variable.isDisabled();
 		checkbox.setSelection(variable.getValueAsBoolean());
-		checkbox.setEnabled(!variable.isDisabled());
+		checkbox.setEnabled(enabled);
+		setLabelEnabled(enabled);
 		
 		final SelectionAdapter modifyListener = new SelectionAdapter() {
 			@Override
@@ -61,7 +63,9 @@ public class CheckboxControl extends AbstractControl<Button> {
 				if (((VariableChangeEvent)e).source == checkbox)
 					return;
 				
-				checkbox.setEnabled(!variable.isDisabled());
+				final boolean enabled = !variable.isDisabled();
+				checkbox.setEnabled(enabled);
+				setLabelEnabled(enabled);
 				boolean value = variable.getValueAsBoolean();
 				if (checkbox.getSelection() != value) {
 					checkbox.removeSelectionListener(modifyListener);

@@ -30,7 +30,7 @@ import org.granite.wizard.bindings.Variable;
  */
 public class Controls {
 	
-	public static AbstractControl<?> createControl(Composite parent, int widthHint, Variable variable) {
+	public static AbstractControl<?> createControl(Composite parent, Label label, int widthHint, Variable variable) {
 		
 		AbstractControl<?> control = null;
 		
@@ -47,7 +47,7 @@ public class Controls {
 			control = new UnknownControl(variable); break;
 		}
 		
-		control.createControl(parent, widthHint);
+		control.createControl(parent, label, widthHint);
 		
 		return control;
 	}

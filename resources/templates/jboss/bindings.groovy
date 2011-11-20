@@ -49,7 +49,7 @@ graniteBuilder = [
 	value: Eclipse.hasExtension("org.granite.builder.granitebuilder")
 ]
 graniteBuilderPatterns = [
-	label: "GraniteBuilder Java patterns",
+	label: "|- GraniteBuilder Java patterns",
 	controlType: ControlType.TEXT,
 	type: String.class,
 	disabled: { !graniteBuilder.value },
@@ -68,7 +68,7 @@ tideEnabled = [
 	value: true
 ]
 tideFramework = [
-	label: "Tide framework",
+	label: "|- Tide framework",
 	controlType: ControlType.COMBO,
 	type: String.class,
 	disabled: { !tideEnabled.value },

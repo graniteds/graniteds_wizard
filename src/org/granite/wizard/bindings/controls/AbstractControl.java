@@ -20,8 +20,10 @@
 
 package org.granite.wizard.bindings.controls;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.granite.wizard.bindings.Variable;
 
 /**
@@ -30,6 +32,7 @@ import org.granite.wizard.bindings.Variable;
 public abstract class AbstractControl<T extends Control> {
 
 	protected Variable variable;
+	protected Label label;
 	protected T control;
 
 	public AbstractControl(Variable variable) {
@@ -40,9 +43,17 @@ public abstract class AbstractControl<T extends Control> {
 		return control;
 	}
 	
-	public T createControl(Composite parent, int widthHint) {
+	public T createControl(Composite parent, Label label, int widthHint) {
+		this.label = label;
 		control = internalCreateControl(parent, widthHint);
 		return control;
+	}
+	
+	public void setLabelEnabled(boolean enabled) {
+		if (enabled)
+			label.setForeground(label.getDisplay().getSystemColor(SWT.COLOR_TITLE_FOREGROUND));
+		else
+			label.setForeground(label.getDisplay().getSystemColor(SWT.COLOR_TITLE_INACTIVE_FOREGROUND));
 	}
 	
 	protected abstract T internalCreateControl(Composite parent, int widthHint);

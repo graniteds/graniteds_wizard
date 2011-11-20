@@ -64,7 +64,7 @@ public class DirectoryControl extends AbstractControl<Composite> {
 		gridData.widthHint = widthHint;
 		box.setLayoutData(gridData);
 		
-		boolean enabled = !variable.isDisabled();
+		final boolean enabled = !variable.isDisabled();
 		
 		text = new Text(box, SWT.SINGLE | SWT.BORDER);
 		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -96,6 +96,7 @@ public class DirectoryControl extends AbstractControl<Composite> {
 			}
 		});
 
+		setLabelEnabled(enabled);
 		
 		box.addListener(VariableChangeEvent.ID, new Listener() {
 			@Override
@@ -103,9 +104,10 @@ public class DirectoryControl extends AbstractControl<Composite> {
 				if (((VariableChangeEvent)e).source == box)
 					return;				
 				
-				boolean enabled = !variable.isDisabled();
+				final boolean enabled = !variable.isDisabled();
 				text.setEnabled(enabled);
 				button.setEnabled(enabled);
+				setLabelEnabled(enabled);
 				
 				String value = variable.getValueAsString();
 				if (!text.getText().equals(value)) {

@@ -110,10 +110,12 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 		        	if (labelText != null) {
 			            Label label = new Label(composite, SWT.NONE);
 			            label.setFont(composite.getFont());
+			            if (labelText.startsWith("|- "))
+			            	labelText = "  \u21b3 " + labelText.substring(2);
 			            label.setText(labelText + ":");
 			            label.setToolTipText(variable.getTooltip());
 			            
-			            variable.createControl(composite, 200);
+			            variable.createControl(composite, label, 200);
 		        	}
 		        }
 

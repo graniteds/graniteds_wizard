@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.granite.wizard.bindings.controls.AbstractControl;
 import org.granite.wizard.bindings.controls.Controls;
 
@@ -85,8 +86,8 @@ public class Variable {
 		return control;
 	}
 	
-	public Control createControl(Composite parent, int widthHint) {
-		return (control = Controls.createControl(parent, widthHint, this)).getControl();
+	public Control createControl(Composite parent, Label label, int widthHint) {
+		return (control = Controls.createControl(parent, label, widthHint, this)).getControl();
 	}
 	
 	public boolean isDisabled() {
