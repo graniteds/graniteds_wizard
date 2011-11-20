@@ -22,8 +22,10 @@ package org.granite.wizard;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
@@ -63,6 +65,7 @@ public class DynamicProjectWizard extends Wizard implements IExecutableExtension
 		this.selection = selection;
 	}
 
+	@Override
 	public void addPages() {
 		super.addPages();
 		
@@ -73,6 +76,15 @@ public class DynamicProjectWizard extends Wizard implements IExecutableExtension
 	@Override
 	public void createPageControls(Composite pageContainer) {
 		super.createPageControls(pageContainer);
+		
+		try {
+			setDefaultPageImageDescriptor(ImageDescriptor.createFromImage(
+				new Image(pageContainer.getDisplay(), getClass().getClassLoader().getResourceAsStream("icons/gdswiz.gif"))
+			));
+		}
+		catch (Exception e) {
+			// ignore...
+		}
 	}
 
 	@Override

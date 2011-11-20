@@ -13,7 +13,7 @@
 			class="org.granite.wizard.DynamicProjectWizard"
 			category="org.granite.wizard"
 			project="true"
-			icon="icons/gds16.gif">
+			icon="bin/icons/gds16.gif">
 			<description>New GraniteDS Projects</description>
 	    </wizard>	 
 	  	<!--primaryWizard
