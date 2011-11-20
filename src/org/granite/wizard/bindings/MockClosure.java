@@ -25,14 +25,14 @@ import groovy.lang.Closure;
 /**
  * @author Franck WOLFF
  */
-public class MockClosure extends Closure {
+public class MockClosure extends Closure<Object> {
 	
 	private static final long serialVersionUID = 1L;
 
-	private final Closure original;
+	private final Closure<?> original;
 	private Object value;
 	
-	public MockClosure(Closure original, Object value) {
+	public MockClosure(Closure<?> original, Object value) {
 		super(null);
 		
 		this.original = original;
@@ -58,7 +58,7 @@ public class MockClosure extends Closure {
 	}
 
 	@Override
-	public Object call(Object[] arg0) {
+	public Object call(Object... arg0) {
 		return value;
 	}
 

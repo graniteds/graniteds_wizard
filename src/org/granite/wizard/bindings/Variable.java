@@ -157,7 +157,7 @@ public class Variable {
 				value = previousValue;
 			}
 			else
-				value = new MockClosure((Closure)previousValue, value);
+				value = new MockClosure((Closure<?>)previousValue, value);
 		}
 		values.put(name, value);
 	}
@@ -169,9 +169,9 @@ public class Variable {
 		Object value = values.get(name);
 		if (value instanceof Closure) {
 			if (params != null && params.length > 0)
-				value = ((Closure)value).call(params);
+				value = ((Closure<?>)value).call(params);
 			else
-				value = ((Closure)value).call();
+				value = ((Closure<?>)value).call();
 		}
 		return value;
 	}
