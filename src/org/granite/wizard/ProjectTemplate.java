@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import org.granite.generator.util.PropertiesUtil;
 import org.granite.wizard.controllers.AbstractTemplateController;
+import org.granite.wizard.controllers.DefaultProjectTemplateController;
 
 /**
  * @author Franck WOLFF
@@ -66,8 +67,8 @@ public class ProjectTemplate {
 			throw new ProjectTemplateException("No or empty template name in: " + directory + "/" + TEMPLATE_PROPERTIES);
 		
 		String controllerClassName = properties.getProperty(CONTROLLER);
-		if (name == null || name.length() == 0)
-			throw new ProjectTemplateException("No or empty template controller in: " + directory + "/" + TEMPLATE_PROPERTIES);
+		if (controllerClassName == null || controllerClassName.length() == 0)
+			controllerClassName = DefaultProjectTemplateController.class.getName();
 
 		try {
 			this.controller = (Class<? extends AbstractTemplateController>)getClass().getClassLoader().loadClass(controllerClassName);

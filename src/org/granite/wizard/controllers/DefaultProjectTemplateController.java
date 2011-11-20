@@ -63,7 +63,7 @@ import org.granite.wizard.bindings.VariableChangeEvent;
 /**
  * @author Franck WOLFF
  */
-public class BasicProjectTemplateController extends AbstractTemplateController {
+public class DefaultProjectTemplateController extends AbstractTemplateController {
 
 	private WizardNewProjectCreationPage projectPage;
 	private Bindings bindings;
@@ -111,6 +111,7 @@ public class BasicProjectTemplateController extends AbstractTemplateController {
 			            Label label = new Label(composite, SWT.NONE);
 			            label.setFont(composite.getFont());
 			            label.setText(labelText + ":");
+			            label.setToolTipText(variable.getTooltip());
 			            
 			            variable.createControl(composite, 200);
 		        	}

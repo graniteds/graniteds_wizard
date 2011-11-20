@@ -6,4 +6,5 @@
 flex.src.dir = ${flexSrcDir}
 flex.bin.dir = ${flexBinDir}
 build.dir = build
+deploy.dir = ${deployDir}
 

@@ -72,6 +72,11 @@ public class Variable {
 		return (o != null ? o.toString() : null);
 	}
 	
+	public String getTooltip() {
+		Object o = internalGet("tooltip");
+		return (o != null ? o.toString() : null);
+	}
+	
 	public ControlType getControlType() {
 		return (ControlType)internalGet("controlType");
 	}

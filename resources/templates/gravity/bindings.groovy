@@ -2,7 +2,8 @@ import org.granite.wizard.bindings.Eclipse;
 import org.granite.wizard.bindings.ControlType;
 
 gravityServlet = [
-	label: "Target Platform",
+	label: "Target platform",
+	tooltip: "Type of application server asynchronous servlet technology",
 	controlType: ControlType.COMBO,
 	type: String.class,
 	possibleValues: [
@@ -16,6 +17,7 @@ gravityServlet = [
 ]
 flexSrcDir = [
 	label: "Flex source directory",
+	tooltip: "Name of the project directory for Flex sources",
 	controlType: ControlType.TEXT,
 	type: String.class,
 	value: "flex",
@@ -23,7 +25,8 @@ flexSrcDir = [
 	errorMessage: "Must be a valid directory name"
 ]
 flexBinDir = [
-	label: "Java binary directory",
+	label: "Flex binary directory",
+	tooltip: "Name of the project directory for Flex binaries (compiled swf)",
 	controlType: ControlType.TEXT,
 	type: String.class,
 	value: { "bin-" + flexSrcDir.value },
@@ -32,21 +35,34 @@ flexBinDir = [
 ]
 antBuild = [
 	label: "Create an Ant build file",
+	tooltip: "Should we create a build.xml file (Flex compilation, WAR archive, deployment configuration)?",
 	controlType: ControlType.CHECKBOX,
 	type: Boolean.class,
 	value: true
 ]
-flexSdkDir = [
-	label: "Flex SDK directory",
+deployDir = [
+	label: "Deployement directory",
+	tooltip: "Directory where the WAR file will be deployed",
 	controlType: ControlType.DIRECTORY,
 	type: File.class,
 	disabled: { !antBuild.value },	
-	value: "/flex_sdk_4",
+	value: "/path/to/as/deploy",
+	validate: { value -> value.isDirectory() },
+	errorMessage: "Must be a valid directory"
+]
+flexSdkDir = [
+	label: "Flex SDK directory",
+	tooltip: "Root directory of the Flex SDK used when compiling Flex sources without Flash Builder",
+	controlType: ControlType.DIRECTORY,
+	type: File.class,
+	disabled: { !antBuild.value },	
+	value: "/path/to/flex_sdk_4",
 	validate: { value -> value.isDirectory() },
 	errorMessage: "Must be a valid directory"
 ]
 flexBuilder = [
-	label: "Configure FlashBuilder",
+	label: "Configure Flash Builder",
+	tooltip: "Create Flash Builder configuration files and add Flex nature and builder",
 	controlType: ControlType.CHECKBOX,
 	type: Boolean.class,
 	disabled: !Eclipse.hasExtension("com.adobe.flexbuilder.project.flexbuilder"),
