@@ -34,7 +34,7 @@ import java.util.Properties;
 
 import org.codehaus.groovy.control.CompilationFailedException;
 import org.codehaus.groovy.runtime.InvokerHelper;
-import org.granite.generator.util.PropertiesUtil;
+import org.granite.wizard.util.PropertiesUtil;
 
 /**
  * @author Franck WOLFF

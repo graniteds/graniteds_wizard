@@ -27,9 +27,9 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import org.granite.generator.util.PropertiesUtil;
 import org.granite.wizard.controllers.AbstractTemplateController;
 import org.granite.wizard.controllers.DefaultProjectTemplateController;
+import org.granite.wizard.util.PropertiesUtil;
 
 /**
  * @author Franck WOLFF

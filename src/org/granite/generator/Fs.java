@@ -18,25 +18,28 @@
   along with this library; if not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.granite.wizard.repository;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-
-import org.eclipse.core.runtime.SubMonitor;
-import org.granite.wizard.DynamicProjectWizard;
-import org.granite.wizard.ProjectTemplate;
+package org.granite.generator;
 
 /**
+ * Utility class intended to be used in Groovy scripts.
+ * 
  * @author Franck WOLFF
  */
-public interface Repository {
+public class Fs {
 
-	public void initialize(DynamicProjectWizard wizard, ProjectTemplate template) throws IOException;
-	
-	File getFile(URI uri) throws IOException;
-	File getFile(URI uri, SubMonitor monitor) throws IOException;
-	boolean clearFile(URI uri);
-	void clearAllFile();
+	/**
+	 * Escape (double) backslashes characters. This method is useful when
+	 * generating standard properties files because single backslash characters
+	 * are discarded at load time.
+	 * 
+	 * @param o an object whose string representation must be escaped.
+	 * @return the string representation of the parameter with escaped
+	 * 		backslashes (or null if o was null).
+	 */
+	public static String escapeBackslashes(Object o) {
+		if (o == null)
+			return null;
+		
+		return o.toString().replace("\\", "\\\\");
+	}
 }

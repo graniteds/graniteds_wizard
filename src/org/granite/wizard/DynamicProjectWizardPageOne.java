@@ -39,8 +39,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
-import org.granite.generator.util.PropertiesUtil;
 import org.granite.wizard.controllers.AbstractTemplateController;
+import org.granite.wizard.util.PropertiesUtil;
 
 /**
  * @author Franck WOLFF
