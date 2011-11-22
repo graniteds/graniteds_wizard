@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<services-config>
+
+	<!--
+	Configure a destination bound to a stateless (application scope) POJO service.
+	-->
+    <services>
+        <service id="granite-service"
+            class="flex.messaging.services.RemotingService"
+            messageTypes="flex.messaging.messages.RemotingMessage">
+            <destination id="helloWorldService">
+                <channels>
+                    <channel ref="graniteamf"/>
+                </channels>
+                <properties>
+                    <scope>application</scope>
+                    <source>org.test.HelloWorldService</source>
+                </properties>
+            </destination>
+        </service>
+    </services>
+
+	<!--
+	Use standard AMFChannel, "http://" uri and AMFEndpoint. You must recompile your Flex
+	application whenever you change these settings.
+	-->
+    <channels>
+        <channel-definition id="graniteamf" class="mx.messaging.channels.AMFChannel">
+            <endpoint
+                uri="http://{server.name}:{server.port}/{context.root}/graniteamf/amf"
+                class="flex.messaging.endpoints.AMFEndpoint"/>
+        </channel-definition>
+    </channels>
+
+</services-config>
