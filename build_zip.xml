@@ -41,8 +41,11 @@
 			<zipfileset dir="." prefix="${pluginDir}">
 				<include name="**"/>
 				<exclude name="*.zip"/>
+				<exclude name="resources/repository/**"/>
+				<exclude name="resources/templates/*/default.properties"/>
 				<exclude name=".git/**"/>
 				<exclude name="**/.gitignore"/>
+				<exclude name="**/.DS_Store"/>
 			</zipfileset>
 		</zip>
 	</target>
