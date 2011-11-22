@@ -26,6 +26,7 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
@@ -46,12 +47,25 @@ public class ComboControl extends AbstractControl<Combo> {
 	protected Combo internalCreateControl(Composite parent, int widthHint) {
 		
 		final Combo combo = new Combo(parent, SWT.READ_ONLY);
-		final boolean enabled = !variable.isDisabled();
+		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+		gridData.widthHint = widthHint;
+		combo.setLayoutData(gridData);
 		Map<String, String> items = variable.getPossibleValues();
 		String[] labels = items.keySet().toArray(new String[0]);
 		String[] values = items.values().toArray(new String[0]);
 		combo.setItems(labels);
-		combo.select(indexOf(values, variable.getValueAsString()));
+		
+		if (values.length > 0) {
+			int selected = indexOf(values, variable.getValueAsString());
+			if (selected == -1) {
+				combo.select(0);
+				variable.setValue(values[0]);
+			}
+			else
+				combo.select(selected);
+		}
+
+		final boolean enabled = !variable.isDisabled();
 		combo.setEnabled(enabled);
 		setLabelEnabled(enabled);
 		

@@ -59,25 +59,47 @@ import org.granite.wizard.WizardException;
 import org.granite.wizard.bindings.Bindings;
 import org.granite.wizard.bindings.Variable;
 import org.granite.wizard.bindings.VariableChangeEvent;
+import org.granite.wizard.repository.DefaultRepository;
+import org.granite.wizard.repository.Repository;
 
 /**
  * @author Franck WOLFF
  */
 public class DefaultProjectTemplateController extends AbstractTemplateController {
 
+	private Repository repository;
 	private WizardNewProjectCreationPage projectPage;
 	private Bindings bindings;
 
 	@Override
-	public void initialize(final DynamicProjectWizard wizard, ProjectTemplate template) {
-		super.initialize(wizard, template);
-		
+	public Repository getRepository() {
+		return repository;
+	}
+	
+	protected void initializeRepository() {
+		repository = new DefaultRepository();
+		try {
+			repository.initialize(wizard, template);
+		} catch (Exception e) {
+			throw new WizardException("Failed to initialize repository", e);
+		}
+	}
+	
+	protected void initializeBindings() {
 		try {
 			bindings = new Bindings(getTemplate().getBindingsFile());
 		}
 		catch (Exception e) {
 			throw new WizardException("Failed to load: " + getTemplate().getBindingsFile(), e);
 		}
+	}
+
+	@Override
+	public void initialize(final DynamicProjectWizard wizard, ProjectTemplate template) {
+		super.initialize(wizard, template);
+
+		initializeRepository();
+		initializeBindings();
 		
 		projectPage = new WizardNewProjectCreationPage(getClass().getSimpleName()) {
 
@@ -161,7 +183,10 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 					for (Variable variable : bindings.getVariables()) {
 						String message = variable.validate();
 						if (message != null) {
-							setErrorMessage(variable.getLabel() + ": " + message);
+							String labelText = variable.getLabel();
+				            if (labelText.startsWith("|- "))
+				            	labelText = labelText.substring(2);
+							setErrorMessage(labelText + ": " + message);
 							valid = false;
 							break;
 						}

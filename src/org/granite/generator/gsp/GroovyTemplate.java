@@ -38,6 +38,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,7 +75,7 @@ public class GroovyTemplate {
             GroovyShell shell = new GroovyShell(classLoader);
             Script script = shell.parse(source);
             
-            Binding binding = new Binding(variables);
+            Binding binding = new Binding(new HashMap<String, Object>(variables));
             Script scriptInstance = InvokerHelper.createScript(script.getClass(), binding);
     		
             PrintWriter out = new PrintWriter(new OutputStreamWriter(buffer));

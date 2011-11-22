@@ -90,14 +90,19 @@ public class Bindings {
 		Properties defaultProperties = new Properties();
 		for (Variable variable : variables)
 			defaultProperties.put(variable.getName(), variable.getValueAsString());
-		PropertiesUtil.saveProperties(defaultProperties, source.getParentFile(), DEFAULT_PROPERTIES);
+		try {
+			PropertiesUtil.storeProperties(defaultProperties, source.getParentFile(), DEFAULT_PROPERTIES, true);
+		}
+		catch (IOException e) {
+			// log...
+		}
 	}
 	
 	private Properties loadDefaultProperties() {
 		try {
-			return PropertiesUtil.loadProperties(source.getParentFile(), DEFAULT_PROPERTIES);
+			return PropertiesUtil.loadProperties(source.getParentFile(), DEFAULT_PROPERTIES, true);
 		}
-		catch (Exception e) {
+		catch (IOException e) {
 			return new Properties();
 		}
 	}

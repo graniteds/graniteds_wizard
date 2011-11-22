@@ -23,6 +23,7 @@ package org.granite.wizard;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -60,15 +61,23 @@ public class ProjectTemplate {
 		if (ignoreFiles!= null)
 			this.ignoreFiles = Pattern.compile(ignoreFiles);
 		
-		this.properties = PropertiesUtil.loadProperties(directory, TEMPLATE_PROPERTIES);
+		try {
+			this.properties = PropertiesUtil.loadProperties(directory, TEMPLATE_PROPERTIES, true);
+		}
+		catch (IOException e) {
+			throw new ProjectTemplateException("Could not load template properties", e);
+		}
 		
-		this.name = properties.getProperty(NAME);
+		String name = properties.getProperty(NAME);
 		if (name == null || name.length() == 0)
 			throw new ProjectTemplateException("No or empty template name in: " + directory + "/" + TEMPLATE_PROPERTIES);
+		this.name = name.trim();
 		
 		String controllerClassName = properties.getProperty(CONTROLLER);
 		if (controllerClassName == null || controllerClassName.length() == 0)
 			controllerClassName = DefaultProjectTemplateController.class.getName();
+		else
+			controllerClassName = controllerClassName.trim();
 
 		try {
 			this.controller = (Class<? extends AbstractTemplateController>)getClass().getClassLoader().loadClass(controllerClassName);
@@ -129,12 +138,12 @@ public class ProjectTemplate {
 	
 	public String getTitle() {
 		String title = properties.getProperty(TITLE);
-		return (title != null ? title : name);
+		return (title != null ? title.trim() : name);
 	}
 	
 	public String getDescription() {
 		String description = properties.getProperty(DESCRIPTION);
-		return (description != null ? description : "");
+		return (description != null ? description.trim() : "");
 	}
 	
 	public boolean ignoreFile(File file) {

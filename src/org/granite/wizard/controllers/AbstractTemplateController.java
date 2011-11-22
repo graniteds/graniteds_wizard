@@ -20,24 +20,34 @@
 
 package org.granite.wizard.controllers;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+import groovy.lang.Script;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.groovy.runtime.InvokerHelper;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.granite.generator.gsp.GroovyTemplate;
+import org.granite.wizard.CancelFileGenerationException;
 import org.granite.wizard.DynamicProjectWizard;
 import org.granite.wizard.ProjectTemplate;
 import org.granite.wizard.bindings.Bindings;
 import org.granite.wizard.bindings.Variable;
+import org.granite.wizard.repository.Repository;
 
 /**
  * @author Franck WOLFF
@@ -78,10 +88,13 @@ public abstract class AbstractTemplateController {
 	}
 	
 	protected void createProjectResources(File projectDir, URI projectTemplateURI, File directory, SubMonitor monitor, Map<String, Object> variables) throws IOException {
+		
 		for (File file : directory.listFiles()) {
 			
 			if (template.ignoreFile(file))
 				continue;
+			
+			boolean deleteAfterCopy = false;
 			
 			String relativePath = projectTemplateURI.relativize(file.toURI()).getPath();
 			if (relativePath.contains("${"))
@@ -96,18 +109,27 @@ public abstract class AbstractTemplateController {
 				createProjectResources(projectDir, projectTemplateURI, file, monitor, variables);
 			}
 			else {
-				boolean isReference = file.getName().startsWith("@");
-				if (isReference) {
-					String resolved = file.getName().substring(1).replace('!', '/');
-					File resolvedFile = new File(template.getResourcesDirectory(), resolved);
-					relativePath = projectTemplateURI.relativize(file.getParentFile().toURI()).getPath() + resolvedFile.getName();
-					file = resolvedFile;
+				if (file.getName().startsWith("@uri:")) {
+					URI uri = resolveUri(file, variables);
+					
+					if (uri == null) // CancelFileGenerationException.
+						continue;
+
+					relativePath = projectTemplateURI.relativize(file.getParentFile().toURI()).getPath() + file.getName().substring(5);
+					
+					if ("file".equals(uri.getScheme()))
+						file = resolveFile(template.getResourcesDirectory(), uri);
+					else if ("http".equals(uri.getScheme()))
+						file = getRepository().getFile(uri, monitor);
+					else
+						throw new IOException("Unsupported scheme uri: " + uri + " in file: " + file);
+					
+					assert(file != null);
 				}
 				
 				boolean isTemplate = relativePath.endsWith(".gsp");
-				if (isTemplate) {
+				if (isTemplate)
 					relativePath = relativePath.substring(0, relativePath.length() - 4);
-				}
 				
 				File projectFile = new File(projectDir, relativePath);
 				if (isTemplate) {
@@ -117,6 +139,8 @@ public abstract class AbstractTemplateController {
 				else {
 					monitor.setTaskName("Copying file: " + relativePath);
 					copyFile(file, projectFile);
+					if (deleteAfterCopy)
+						file.delete();
 				}
 				
 				monitor.setWorkRemaining(80);
@@ -161,6 +185,43 @@ public abstract class AbstractTemplateController {
 		return s;
 	}
 	
+	protected URI resolveUri(File uriFile, Map<String, Object> variables) throws IOException {
+		try {
+			GroovyShell shell = new GroovyShell(getClass().getClassLoader());
+			Script script = shell.parse(uriFile);
+			Script scriptInstance = InvokerHelper.createScript(script.getClass(), new Binding(new HashMap<String, Object>(variables)));
+			scriptInstance.run();
+			
+			Object uri = scriptInstance.getBinding().getVariable("uri");
+			if (uri == null)
+				throw new IOException("Uri file: " + uriFile + " does not declare a \"uri\" variable");
+			
+			try {
+				return new URI(uri.toString());
+			}
+			catch (URISyntaxException e) {
+				throw new IOException("Uri file: " + uriFile + " declares an invalid \"uri\" variable: " + uri, e);
+			}
+	    }
+	    catch (CancelFileGenerationException e) {
+	    	return null;
+	    }
+	}
+	
+	protected File resolveFile(File parent, URI uri) throws FileNotFoundException {
+		String path = uri.getSchemeSpecificPart();
+		File file = new File(path);
+
+		if (!file.isAbsolute())
+			file = new File(parent, path);
+		if (!file.exists())
+			throw new FileNotFoundException(file.toString());
+		
+		return file;
+	}
+	
+	public abstract Repository getRepository();
+
 	public abstract boolean canFinish();
 	
 	public abstract boolean performFinish() throws CoreException, InterruptedException;

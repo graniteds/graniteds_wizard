@@ -21,6 +21,7 @@
 package org.granite.wizard;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +35,10 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
 import org.granite.generator.util.PropertiesUtil;
 import org.granite.wizard.controllers.AbstractTemplateController;
 
@@ -96,7 +99,12 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 		if (!templatesDirectory.isDirectory())
 			throw new WizardException("Not a directory: " + TEMPLATES, null);
 		
-		properties = PropertiesUtil.loadProperties(templatesDirectory, TEMPLATES_PROPERTIES);
+		try {
+			properties = PropertiesUtil.loadProperties(templatesDirectory, TEMPLATES_PROPERTIES);
+		}
+		catch (IOException e) {
+			throw new WizardException("Could not load general template properties: ", e);
+		}
 		
 		File[] templatesSubDirectories = templatesDirectory.listFiles();
 		for (File template : templatesSubDirectories) {
@@ -115,15 +123,28 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		
-		Composite composite= new Composite(parent, SWT.NULL);
+		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
-		composite.setLayout(new FillLayout());
+        GridLayout layout = new GridLayout();
+        layout.numColumns = 2;
+        layout.makeColumnsEqualWidth = false;
+        layout.horizontalSpacing = 10;
+		composite.setLayout(layout);
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		final org.eclipse.swt.widgets.List templatesList = new org.eclipse.swt.widgets.List(composite, SWT.BORDER | SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
+		GridData listGridData = new GridData(GridData.FILL_BOTH);
+		listGridData.widthHint = 220;
+		templatesList.setLayoutData(listGridData);
 		if (templates.size() > 0) {
 			for (ProjectTemplate template : templates)
-				templatesList.add(template.getName() + " (" + template.getDescription() + ")");
+				templatesList.add(template.getName());
 		}
+		
+		final Text text = new Text(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL);
+		GridData textGridData = new GridData(GridData.FILL_BOTH);
+		textGridData.widthHint = 180;
+		text.setLayoutData(textGridData);
 
 		templatesList.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -131,6 +152,7 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 					setErrorMessage(null);
 					int index = templatesList.getSelectionIndex();
 					ProjectTemplate template = templates.get(index);
+					text.setText(template.getDescription());
 					controller = template.getController().newInstance();
 					controller.initialize((DynamicProjectWizard)getWizard(), template);
 					setPageComplete(true);
