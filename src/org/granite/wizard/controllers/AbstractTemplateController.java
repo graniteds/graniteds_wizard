@@ -150,6 +150,9 @@ public abstract class AbstractTemplateController {
 	}
 	
 	protected void copyFile(File source, File target) throws IOException {
+		if (target.getParentFile() != null && !target.getParentFile().exists())
+			target.getParentFile().mkdirs();
+		
 		InputStream in = null;
 	    OutputStream out = null;
 	    try {
@@ -167,15 +170,19 @@ public abstract class AbstractTemplateController {
 	    }
 	}
 	
-	protected String resolveVariables(String s, Map<String, Object> bindings) {
+	protected String resolveVariables(String s, Map<String, Object> variables) {
+		
+		GroovyShell shell = new GroovyShell(getClass().getClassLoader());
 		boolean resolved = true;
 		int iStart = -1, iEnd = -1;
 		while ((iStart = s.indexOf("${")) != -1 && resolved) {
 			resolved = false;
 			iEnd = s.indexOf('}', iStart + 2);
 			if (iEnd != -1) {
-				String variable = s.substring(iStart + 2, iEnd);
-				Object value = bindings.get(variable);
+				String expr = "import org.granite.generator.Fs;return " + s.substring(iStart + 2, iEnd) + ";";
+				Script script = shell.parse(expr);
+				Script scriptInstance = InvokerHelper.createScript(script.getClass(), new Binding(new HashMap<String, Object>(variables)));
+				Object value = scriptInstance.run();
 				if (value != null) {
 					s = s.substring(0, iStart) + value + s.substring(iEnd + 1);
 					resolved = true;

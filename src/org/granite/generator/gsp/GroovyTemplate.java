@@ -102,7 +102,10 @@ public class GroovyTemplate {
         }
         
         // Write in target file (step 2).
-		OutputStream os = null;
+		if (targetFile.getParentFile() != null && !targetFile.getParentFile().exists())
+			targetFile.getParentFile().mkdirs();
+		
+        OutputStream os = null;
 		try {
 			os = new FileOutputStream(targetFile);
 			os.write(buffer.getBytes(), 0, buffer.size());

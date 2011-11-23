@@ -42,4 +42,20 @@ public class Fs {
 		
 		return o.toString().replace("\\", "\\\\");
 	}
+
+	/**
+	 * Replace all '.' characters file by '/' characters. This method is useful
+	 * when specifying package in directory names (eg.
+	 * java-source/${Fs.dotsToSlashes(packageName)}/MyClass.java).
+	 * 
+	 * @param o an object whose string representation must be transformed.
+	 * @return the string representation of the parameter with '.'
+	 * 		replaced by slashes (or null if o was null).
+	 */
+	public static String dotsToSlashes(Object o) {
+		if (o == null)
+			return null;
+		
+		return o.toString().replace('.', '/');
+	}
 }
