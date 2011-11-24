@@ -41,7 +41,7 @@ public class DynamicProjectWizard extends Wizard implements IExecutableExtension
 	private DynamicProjectWizardPageOne pageOne;
 
 	public DynamicProjectWizard() {
-		setWindowTitle("New GraniteDS Projects");
+		setWindowTitle("New GraniteDS Project");
 	}
 
 	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {

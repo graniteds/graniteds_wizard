@@ -9,7 +9,7 @@
 	    </category>
 	  	<wizard
 			id="org.granite.wizard.DynamicProjectWizard"
-			name="GraniteDS Projects"
+			name="GraniteDS Project"
 			class="org.granite.wizard.DynamicProjectWizard"
 			category="org.granite.wizard"
 			project="true"

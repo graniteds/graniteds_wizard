@@ -69,7 +69,7 @@ buildDir = [
 	errorMessage: "Must be a valid directory name"
 ]
 deployDir = [
-	label: "|- Deployement directory",
+	label: "|- Deployment directory",
 	tooltip: "Directory where the WAR file will be deployed",
 	controlType: ControlType.DIRECTORY,
 	type: File.class,
