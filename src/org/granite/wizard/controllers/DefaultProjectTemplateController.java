@@ -20,19 +20,9 @@
 
 package org.granite.wizard.controllers;
 
-import java.io.File;
 import java.util.Map;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
@@ -49,10 +39,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
-import org.granite.wizard.Activator;
 import org.granite.wizard.DynamicProjectWizard;
 import org.granite.wizard.ProjectTemplate;
 import org.granite.wizard.WizardException;
@@ -197,7 +184,6 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 		};
 		projectPage.setInitialProjectName("");
 		projectPage.setTitle(template.getTitle());
-//		projectPage.setDescription(template.getDescription());
 		projectPage.setWizard(getWizard());
 		projectPage.setPreviousPage(getStartingPage());
 		
@@ -217,84 +203,8 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 		
 		final Map<String, Object> variables = bindings.getBindingMap();
 		variables.put("projectName", projectPage.getProjectName());
-
-		for (final File projectDirectory : template.getProjectDirectories()) {
 		
-			final String projectName = resolveVariables(projectDirectory.getName(), variables);
-			final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		    final IWorkingSet[] workingSets = projectPage.getSelectedWorkingSets();
-		    
-			Job job = new Job("Creating '" + projectName + "' project...") {
-				public IStatus run(IProgressMonitor monitor) {
-					
-					try {
-						SubMonitor sm = SubMonitor.convert(monitor, 100);
-	
-						// create the project and delete the default ".project" file.
-						sm.setTaskName("Creating project...");
-						project.create(sm.newChild(5));
-						project.open(sm.newChild(5));
-						IFile projectFile = project.getFile(".project");
-						projectFile.delete(true, false, sm.newChild(5));
-						
-						sm.setTaskName("Generating project content...");
-						// create all resources for the project (including a new .project file).
-						createProjectResources(project, projectDirectory, sm.newChild(80), variables);
-	
-						// add project to selected workingsets.
-						if (workingSets != null && workingSets.length > 0)
-							PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, workingSets);
-						sm.worked(5);
-					}
-					catch(CoreException e) {
-						return e.getStatus();
-					}
-					catch(Exception e) {
-						return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not create project '" + projectName + "'", e);
-					}
-					finally {
-						if (monitor != null)
-							monitor.done();
-					}
-					
-					return Status.OK_STATUS;
-		        }
-			};
-		    
-			job.setRule(project);
-		    job.schedule();
-		}
-
-		for (final File projectDirectory : template.getProjectDirectories()) {
-		
-			final String projectName = resolveVariables(projectDirectory.getName(), variables);
-			final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		    
-			Job job = new Job("Refreshing '" + projectName + "' project...") {
-				public IStatus run(IProgressMonitor monitor) {
-					
-					try {
-						SubMonitor sm = SubMonitor.convert(monitor, 100);
-						project.refreshLocal(IResource.DEPTH_INFINITE, sm.newChild(100));
-					}
-					catch(CoreException e) {
-						return e.getStatus();
-					}
-					catch(Exception e) {
-						return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not create project '" + projectName + "'", e);
-					}
-					finally {
-						if (monitor != null)
-							monitor.done();
-					}
-					
-					return Status.OK_STATUS;
-		        }
-			};
-		    
-			job.setRule(project);
-		    job.schedule();
-		}
+		return performFinish(variables, projectPage);
 
 //		IExtensionRegistry reg = RegistryFactory.getRegistry();
 //		IExtension fb = reg.getExtension("com.adobe.flexbuilder.project.flexbuilder");
@@ -320,8 +230,6 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 //		}
 //			
 //		p.setFocus();
-
-	    return true;
 	}
 
 	@Override

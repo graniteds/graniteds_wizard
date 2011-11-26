@@ -29,13 +29,27 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import org.granite.generator.CancelFileGenerationException;
+import org.granite.wizard.Activator;
 import org.granite.wizard.DynamicProjectWizard;
 import org.granite.wizard.ProjectTemplate;
 import org.granite.wizard.repository.Repository;
@@ -72,8 +86,108 @@ public abstract class AbstractTemplateController {
 		this.wizard = wizard;
 		this.template = template;
 	}
+
+	public boolean performFinish(final Map<String, Object> variables, final WizardNewProjectCreationPage projectPage) throws CoreException, InterruptedException {
+
+		final List<Job> jobs = new ArrayList<Job>();
+		
+		// Create all projects and generate their content but do not open them.
+		for (final File projectDirectory : template.getProjectDirectories()) {
+			
+			final String projectName = resolveVariables(projectDirectory.getName(), variables);
+			final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		    final IWorkingSet[] workingSets = projectPage.getSelectedWorkingSets();
+		    
+			Job job = new Job("Creating '" + projectName + "' project...") {
+
+				@Override
+				public IStatus run(IProgressMonitor monitor) {
+					try {
+						SubMonitor sm = SubMonitor.convert(monitor, 100);
 	
-	public void createProjectResources(IProject project, File projectTemplateDirectory, SubMonitor monitor, Map<String, Object> variables) throws IOException {
+						// Create the project, delete the default ".project" file and do not open it.
+						sm.setTaskName("Creating project...");
+						project.create(sm.newChild(5));
+						IFile projectFile = project.getFile(".project");
+						projectFile.delete(true, false, sm.newChild(5));
+						
+						// Create all resources for the project (including a new .project file).
+						sm.setTaskName("Generating project content...");
+						createProjectResources(project, projectDirectory, sm.newChild(85), variables);
+
+						// Add project to selected working sets.
+						if (workingSets != null && workingSets.length > 0)
+							PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, workingSets);
+						sm.worked(5);
+					}
+					catch(CoreException e) {
+						return e.getStatus();
+					}
+					catch(Exception e) {
+						return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not create project '" + projectName + "'", e);
+					}
+					finally {
+						if (monitor != null)
+							monitor.done();
+					}
+					
+					return Status.OK_STATUS;
+		        }
+			};
+		    
+			job.setRule(project);
+		    jobs.add(job);
+		}
+
+		// Open all projects.
+		for (final File projectDirectory : template.getProjectDirectories()) {
+		
+			final String projectName = resolveVariables(projectDirectory.getName(), variables);
+			final IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		    
+			Job job = new Job("Refreshing '" + projectName + "' project...") {
+
+				@Override
+				public IStatus run(IProgressMonitor monitor) {
+					
+					try {
+						// Open the project if it hasn't been already opened has a dependent project.
+						if (!project.isOpen()) {
+							SubMonitor sm = SubMonitor.convert(monitor, 100);
+							project.open(sm.newChild(100));
+						}
+					}
+					catch(CoreException e) {
+						return e.getStatus();
+					}
+					catch(Exception e) {
+						return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not create project '" + projectName + "'", e);
+					}
+					finally {
+						if (monitor != null)
+							monitor.done();
+					}
+					
+					return Status.OK_STATUS;
+		        }
+			};
+		    
+			job.setRule(project);
+		    jobs.add(job);
+		}
+		
+		// Make sure all jobs are executed sequentially (schedule chain, starting with the first one).
+		if (jobs.size() > 0) {
+			final int iMax = jobs.size() - 1;
+			for (int i = 0; i < iMax; i++)
+				jobs.get(i).addJobChangeListener(new NextJobChangeListener(jobs.get(i+1)));
+			jobs.get(0).schedule();
+		}
+		
+		return true;
+	}
+	
+	public void createProjectResources(IProject project, File projectTemplateDirectory, SubMonitor monitor, Map<String, Object> variables) throws CoreException, IOException {
 		File projectDir = new File(project.getLocationURI());
 		monitor.setWorkRemaining(200);
 		createProjectResources(projectDir, projectTemplateDirectory.toURI(), projectTemplateDirectory, monitor, variables);
@@ -257,6 +371,37 @@ public abstract class AbstractTemplateController {
 		return true;
 	}
 	
+	public static class NextJobChangeListener implements IJobChangeListener {
+		
+		private final Job job;
+		
+		public NextJobChangeListener(Job job) {
+			this.job = job;
+		}
+		
+		@Override
+		public void done(IJobChangeEvent event) {
+			if (event.getResult().isOK())
+				job.schedule();
+		}
+		
+		@Override
+		public void sleeping(IJobChangeEvent event) {
+		}
+		@Override
+		public void scheduled(IJobChangeEvent event) {
+		}
+		@Override
+		public void running(IJobChangeEvent event) {
+		}
+		@Override
+		public void awake(IJobChangeEvent event) {
+		}
+		@Override
+		public void aboutToRun(IJobChangeEvent event) {
+		}
+	}
+
 //	/**
 //	 * For tests...
 //	 * 
