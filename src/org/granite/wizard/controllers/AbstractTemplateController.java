@@ -101,7 +101,7 @@ public abstract class AbstractTemplateController {
 				createProjectResources(projectDir, projectTemplateURI, file, monitor, variables);
 			}
 			else {
-				if (file.getName().startsWith("@uri:")) {
+				if (file.getName().startsWith("@uri!")) {
 					relativePath = projectTemplateURI.relativize(file.getParentFile().toURI()).getPath() + file.getName().substring(5);
 					file = resolveUri(file, variables, monitor.newChild(10));
 					if (file == null) // CancelFileGenerationException.
