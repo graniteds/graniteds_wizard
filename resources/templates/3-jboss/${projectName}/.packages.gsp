@@ -1,5 +1,5 @@
 <%
-	import org.granite.wizard.CancelFileGenerationException;
+	import org.granite.generator.CancelFileGenerationException;
 	import org.granite.wizard.bindings.Eclipse;
 
 	if (!Eclipse.hasBundle("org.jboss.ide.eclipse.archives.core"))

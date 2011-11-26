@@ -1,6 +1,6 @@
 <%
 	if (!graniteBuilder)
-		throw new org.granite.wizard.CancelFileGenerationException();
+		throw new org.granite.generator.CancelFileGenerationException();
 
 %><?xml version="1.0" encoding="UTF-8"?>
 <graniteProperties version="2.0">

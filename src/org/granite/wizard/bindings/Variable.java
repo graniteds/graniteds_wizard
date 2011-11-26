@@ -20,7 +20,6 @@
 
 package org.granite.wizard.bindings;
 
-import groovy.lang.Binding;
 import groovy.lang.Closure;
 
 import java.io.File;
@@ -38,17 +37,14 @@ import org.granite.wizard.bindings.controls.Controls;
  */
 public class Variable {
 	
-	private final Binding binding;
 	private final String name;
 	private final Map<String, Object> values;
 
 	private AbstractControl<?> control;
 	
-	@SuppressWarnings("unchecked")
-	public Variable(Binding binding, String name, String storedValue) {
-		this.binding = binding;
+	public Variable(String name, Map<String, Object> values, String storedValue) {
 		this.name = name;
-		this.values = (Map<String, Object>)binding.getVariable(name);
+		this.values = values;
 		
 		if (storedValue != null) {
 			try {
@@ -58,10 +54,6 @@ public class Variable {
 				e.printStackTrace();
 			}
 		}
-	}
-	
-	public Binding getBinding() {
-		return binding;
 	}
 
 	public String getName() {

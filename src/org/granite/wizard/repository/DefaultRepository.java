@@ -78,6 +78,9 @@ public class DefaultRepository implements Repository {
 
 	@Override
 	public synchronized File getFile(URI uri, SubMonitor monitor) throws IOException {
+		
+		monitor.setWorkRemaining(100);
+		
 		File repositoryFile = null;
 
 		final String key = uri.toString();
@@ -112,6 +115,8 @@ public class DefaultRepository implements Repository {
 		// Redundant check...
 		if (repositoryFile == null)
 			throw new IOException("Could not get file: " + uri);
+
+		monitor.worked(100);
 		
 		return repositoryFile;
 	}

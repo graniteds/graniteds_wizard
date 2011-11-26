@@ -22,11 +22,13 @@ package org.granite.wizard;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FilenameFilter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import org.granite.generator.ScriptingEngine;
+import org.granite.wizard.bindings.Bindings;
 import org.granite.wizard.controllers.AbstractTemplateController;
 import org.granite.wizard.controllers.DefaultProjectTemplateController;
 import org.granite.wizard.util.PropertiesUtil;
@@ -36,8 +38,8 @@ import org.granite.wizard.util.PropertiesUtil;
  */
 public class ProjectTemplate {
 
-	private static final String BINDINGS_GROOVY = "bindings.groovy";
-	private static final String TEMPLATE_PROPERTIES = "template.properties";
+	public static final String BINDINGS_GROOVY = "bindings.groovy";
+	public static final String TEMPLATE_PROPERTIES = "template.properties";
 
 	private static final String IGNORE_FILES = "ignoreFiles";
 
@@ -48,18 +50,21 @@ public class ProjectTemplate {
 	
 	private final File directory;
 	private final Properties properties;
+	private final ScriptingEngine engine;
 	private final String name;
 	private final Class<? extends AbstractTemplateController> controller;
+	private final Pattern ignoreFiles;
 	
-	private Pattern ignoreFiles = null;
+	private Bindings bindings;
 	
 	@SuppressWarnings("unchecked")
-	public ProjectTemplate(File directory, Properties globalProperties) {
+	public ProjectTemplate(File directory, Properties globalProperties, ScriptingEngine engine) {
 		this.directory = directory;
 		
 		String ignoreFiles = globalProperties.getProperty(IGNORE_FILES);
-		if (ignoreFiles!= null)
-			this.ignoreFiles = Pattern.compile(ignoreFiles);
+		this.ignoreFiles = Pattern.compile((ignoreFiles != null ? ignoreFiles : "^$"));
+		
+		this.engine = engine;
 		
 		try {
 			this.properties = PropertiesUtil.loadProperties(directory, TEMPLATE_PROPERTIES, true);
@@ -113,19 +118,23 @@ public class ProjectTemplate {
 		return properties;
 	}
 
-	public File getBindingsFile() {
-		
-		File[] bindingsList = directory.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return BINDINGS_GROOVY.equals(name);
-			}
-		});
-		
-		if (bindingsList.length == 0)
-			return null;
-		
-		return bindingsList[0];
+	public ScriptingEngine getEngine() {
+		return engine;
+	}
+
+	public File getBindingsFile() throws IOException {
+		File file = new File(directory, BINDINGS_GROOVY);
+		if (!file.exists())
+			throw new FileNotFoundException("File doesn't exist: " + file);
+		if (!file.isFile())
+			throw new IOException("Not a regular file: " + file);
+		return file;
+	}
+
+	public Bindings getBindings() throws IOException {
+		if (bindings == null)
+			bindings = new Bindings(getBindingsFile(), engine);
+		return bindings;
 	}
 
 	public String getName() {

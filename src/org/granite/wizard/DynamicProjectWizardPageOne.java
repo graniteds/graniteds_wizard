@@ -39,6 +39,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
+import org.granite.generator.ScriptingEngine;
+import org.granite.generator.ScriptingEngineFactory;
 import org.granite.wizard.controllers.AbstractTemplateController;
 import org.granite.wizard.util.PropertiesUtil;
 
@@ -49,11 +51,13 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 
 	private static final String TEMPLATES = "resources/templates";
 	private static final String TEMPLATES_PROPERTIES = "templates.properties";
+	private static final String PROLOG_GROOVY = "prolog.groovy";
 	
-	private IConfigurationElement configurationElement;
+	private IConfigurationElement configurationElement = null;
 	
-	private List<ProjectTemplate> templates = new ArrayList<ProjectTemplate>();	
-	private Properties properties;
+	private ScriptingEngine engine = null;
+	private List<ProjectTemplate> templates = null;	
+	private Properties properties = null;
 	
 	private AbstractTemplateController controller = null;
 	
@@ -85,9 +89,13 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 		return properties;
 	}
 
+	public ScriptingEngine getEngine() {
+		return engine;
+	}
+
 	private void initialize() {
-		this.templates.clear();
-		
+
+		// Find templates directory.
 		File templatesDirectory = null;
 		try {
 			URL url = getClass().getClassLoader().getResource(TEMPLATES);
@@ -99,6 +107,7 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 		if (!templatesDirectory.isDirectory())
 			throw new WizardException("Not a directory: " + TEMPLATES, null);
 		
+		// Load templates.properties file.
 		try {
 			properties = PropertiesUtil.loadProperties(templatesDirectory, TEMPLATES_PROPERTIES);
 		}
@@ -106,11 +115,21 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 			throw new WizardException("Could not load general template properties: ", e);
 		}
 		
+		// Create a scripting engine and load prolog.groovy.
+		engine = ScriptingEngineFactory.createInstance();
+		try {
+			engine.load(new File(templatesDirectory, PROLOG_GROOVY), null);
+		}
+		catch (IOException e) {
+			throw new WizardException("Could not load prolog script: ", e);
+		}
+		
+		templates = new ArrayList<ProjectTemplate>();
 		File[] templatesSubDirectories = templatesDirectory.listFiles();
 		for (File template : templatesSubDirectories) {
 			if (template.isDirectory() && !template.isHidden()) {
 				try {
-					this.templates.add(new ProjectTemplate(template, properties));
+					templates.add(new ProjectTemplate(template, properties, engine));
 				}
 				catch (Exception e) {
 					Activator.log("Template loading error", e);

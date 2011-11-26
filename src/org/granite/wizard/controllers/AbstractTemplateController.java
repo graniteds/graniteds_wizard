@@ -20,10 +20,6 @@
 
 package org.granite.wizard.controllers;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,20 +29,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.groovy.runtime.InvokerHelper;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.granite.generator.gsp.GroovyTemplate;
-import org.granite.wizard.CancelFileGenerationException;
+import org.granite.generator.CancelFileGenerationException;
 import org.granite.wizard.DynamicProjectWizard;
 import org.granite.wizard.ProjectTemplate;
-import org.granite.wizard.bindings.Bindings;
-import org.granite.wizard.bindings.Variable;
 import org.granite.wizard.repository.Repository;
 
 /**
@@ -84,10 +75,14 @@ public abstract class AbstractTemplateController {
 	
 	public void createProjectResources(IProject project, File projectTemplateDirectory, SubMonitor monitor, Map<String, Object> variables) throws IOException {
 		File projectDir = new File(project.getLocationURI());
+		monitor.setWorkRemaining(200);
 		createProjectResources(projectDir, projectTemplateDirectory.toURI(), projectTemplateDirectory, monitor, variables);
+		monitor.worked(200);
 	}
 	
 	protected void createProjectResources(File projectDir, URI projectTemplateURI, File directory, SubMonitor monitor, Map<String, Object> variables) throws IOException {
+		
+		monitor.setTaskName("Creating content from " + directory + " directory...");
 		
 		for (File file : directory.listFiles()) {
 			
@@ -103,7 +98,6 @@ public abstract class AbstractTemplateController {
 			if (file.isDirectory()) {				
 				File projectFile = new File(projectDir, relativePath);
 				monitor.setTaskName("Creating directory: " + relativePath);
-				monitor.setWorkRemaining(80);
 				projectFile.mkdirs();
 				monitor.worked(1);
 				createProjectResources(projectDir, projectTemplateURI, file, monitor, variables);
@@ -112,15 +106,19 @@ public abstract class AbstractTemplateController {
 				if (file.getName().startsWith("@uri:")) {
 					URI uri = resolveUri(file, variables);
 					
+					monitor.worked(5);
+					
 					if (uri == null) // CancelFileGenerationException.
 						continue;
 
 					relativePath = projectTemplateURI.relativize(file.getParentFile().toURI()).getPath() + file.getName().substring(5);
 					
-					if ("file".equals(uri.getScheme()))
+					if ("file".equals(uri.getScheme())) {
 						file = resolveFile(template.getResourcesDirectory(), uri);
+						monitor.worked(5);
+					}
 					else if ("http".equals(uri.getScheme()))
-						file = getRepository().getFile(uri, monitor);
+						file = getRepository().getFile(uri, monitor.newChild(5));
 					else
 						throw new IOException("Unsupported scheme uri: " + uri + " in file: " + file);
 					
@@ -134,7 +132,7 @@ public abstract class AbstractTemplateController {
 				File projectFile = new File(projectDir, relativePath);
 				if (isTemplate) {
 					monitor.setTaskName("Generating file: " + relativePath);
-					GroovyTemplate.executeTemplate(file, projectFile, variables);
+					template.getEngine().execute(file, projectFile, variables);
 				}
 				else {
 					monitor.setTaskName("Copying file: " + relativePath);
@@ -143,8 +141,7 @@ public abstract class AbstractTemplateController {
 						file.delete();
 				}
 				
-				monitor.setWorkRemaining(80);
-				monitor.worked(10);
+				monitor.worked(5);
 			}
 		}
 	}
@@ -171,35 +168,12 @@ public abstract class AbstractTemplateController {
 	}
 	
 	protected String resolveVariables(String s, Map<String, Object> variables) {
-		
-		GroovyShell shell = new GroovyShell(getClass().getClassLoader());
-		boolean resolved = true;
-		int iStart = -1, iEnd = -1;
-		while ((iStart = s.indexOf("${")) != -1 && resolved) {
-			resolved = false;
-			iEnd = s.indexOf('}', iStart + 2);
-			if (iEnd != -1) {
-				String expr = "import org.granite.generator.Fs;return " + s.substring(iStart + 2, iEnd) + ";";
-				Script script = shell.parse(expr);
-				Script scriptInstance = InvokerHelper.createScript(script.getClass(), new Binding(new HashMap<String, Object>(variables)));
-				Object value = scriptInstance.run();
-				if (value != null) {
-					s = s.substring(0, iStart) + value + s.substring(iEnd + 1);
-					resolved = true;
-				}
-			}
-		}
-		return s;
+		return template.getEngine().evaluate(s, variables);
 	}
 	
 	protected URI resolveUri(File uriFile, Map<String, Object> variables) throws IOException {
 		try {
-			GroovyShell shell = new GroovyShell(getClass().getClassLoader());
-			Script script = shell.parse(uriFile);
-			Script scriptInstance = InvokerHelper.createScript(script.getClass(), new Binding(new HashMap<String, Object>(variables)));
-			scriptInstance.run();
-			
-			Object uri = scriptInstance.getBinding().getVariable("uri");
+			Object uri = template.getEngine().evaluate(uriFile, variables).get("uri");
 			if (uri == null)
 				throw new IOException("Uri file: " + uriFile + " does not declare a \"uri\" variable");
 			
@@ -237,32 +211,32 @@ public abstract class AbstractTemplateController {
 		return true;
 	}
 	
-	/**
-	 * For tests...
-	 * 
-	 * @param args
-	 * @throws Exception
-	 */
-	public static void main(String[] args) throws Exception {
-		String fileName = args.length > 0 ? args[0] : "C:\\workspace\\graniteds_wizard\\resources\\templates\\jboss\\bindings.groovy";
-		File f = new File(fileName);
-		Bindings bl = new Bindings(f);
-		
-		System.out.println("---------------------------");
-		for (Variable variable : bl.getVariables()) {
-			System.out.println(variable.getName() + " {");
-			System.out.println("  label: " + variable.getLabel());
-			System.out.println("  controlType: " + variable.getControlType());
-			System.out.println("  possibleValues: " + variable.getPossibleValues());
-			System.out.println("  value: " + variable.getValue());
-			System.out.println("  type: " + variable.getType());
-			System.out.println("  disabled: " + variable.isDisabled());
-			System.out.println("  validate: " + variable.validate());
-			System.out.println("  errorMessage: " + variable.getErrorMessage());
-			System.out.println("}");
-		}
-
-		System.out.println("---------------------------");
-		System.out.println(bl.getBindingMap());
-	}
+//	/**
+//	 * For tests...
+//	 * 
+//	 * @param args
+//	 * @throws Exception
+//	 */
+//	public static void main(String[] args) throws Exception {
+//		String fileName = args.length > 0 ? args[0] : "C:\\workspace\\graniteds_wizard\\resources\\templates\\jboss\\bindings.groovy";
+//		File f = new File(fileName);
+//		Bindings bl = new Bindings(f);
+//		
+//		System.out.println("---------------------------");
+//		for (Variable variable : bl.getVariables()) {
+//			System.out.println(variable.getName() + " {");
+//			System.out.println("  label: " + variable.getLabel());
+//			System.out.println("  controlType: " + variable.getControlType());
+//			System.out.println("  possibleValues: " + variable.getPossibleValues());
+//			System.out.println("  value: " + variable.getValue());
+//			System.out.println("  type: " + variable.getType());
+//			System.out.println("  disabled: " + variable.isDisabled());
+//			System.out.println("  validate: " + variable.validate());
+//			System.out.println("  errorMessage: " + variable.getErrorMessage());
+//			System.out.println("}");
+//		}
+//
+//		System.out.println("---------------------------");
+//		System.out.println(bl.getBindingMap());
+//	}
 }

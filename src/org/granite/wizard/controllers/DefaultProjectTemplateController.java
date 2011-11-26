@@ -87,10 +87,10 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 	
 	protected void initializeBindings() {
 		try {
-			bindings = new Bindings(getTemplate().getBindingsFile());
+			bindings = getTemplate().getBindings();
 		}
 		catch (Exception e) {
-			throw new WizardException("Failed to load: " + getTemplate().getBindingsFile(), e);
+			throw new WizardException("Failed to load bindings file: " + getTemplate().getDirectory(), e);
 		}
 	}
 
@@ -197,7 +197,7 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 		};
 		projectPage.setInitialProjectName("");
 		projectPage.setTitle(template.getTitle());
-		projectPage.setDescription(template.getDescription());
+//		projectPage.setDescription(template.getDescription());
 		projectPage.setWizard(getWizard());
 		projectPage.setPreviousPage(getStartingPage());
 		
@@ -228,31 +228,33 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 				public IStatus run(IProgressMonitor monitor) {
 					
 					try {
-						SubMonitor sm = SubMonitor.convert(monitor);
+						SubMonitor sm = SubMonitor.convert(monitor, 100);
 	
-						// create the project.
+						// create the project and delete the default ".project" file.
 						sm.setTaskName("Creating project...");
-						sm.setWorkRemaining(100);
-						project.create(sm.newChild(1));
-						project.open(sm.newChild(1));
-	
-						// delete the .project file (must be in the template).
+						project.create(sm.newChild(5));
+						project.open(sm.newChild(5));
 						IFile projectFile = project.getFile(".project");
-						projectFile.delete(true, false, sm.newChild(1));
+						projectFile.delete(true, false, sm.newChild(5));
 						
+						sm.setTaskName("Generating project content...");
 						// create all resources for the project (including a new .project file).
-						createProjectResources(project, projectDirectory, sm, variables);
+						createProjectResources(project, projectDirectory, sm.newChild(80), variables);
 	
 						// add project to selected workingsets.
-						sm.setWorkRemaining(10);
 						if (workingSets != null && workingSets.length > 0)
 							PlatformUI.getWorkbench().getWorkingSetManager().addToWorkingSets(project, workingSets);
+						sm.worked(5);
 					}
 					catch(CoreException e) {
 						return e.getStatus();
 					}
 					catch(Exception e) {
 						return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not create project '" + projectName + "'", e);
+					}
+					finally {
+						if (monitor != null)
+							monitor.done();
 					}
 					
 					return Status.OK_STATUS;
@@ -272,17 +274,18 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 				public IStatus run(IProgressMonitor monitor) {
 					
 					try {
-						SubMonitor sm = SubMonitor.convert(monitor);
-						sm.setWorkRemaining(100);
-						project.refreshLocal(IResource.DEPTH_INFINITE, sm.newChild(10));
-						sm.setWorkRemaining(0);
-	
+						SubMonitor sm = SubMonitor.convert(monitor, 100);
+						project.refreshLocal(IResource.DEPTH_INFINITE, sm.newChild(100));
 					}
 					catch(CoreException e) {
 						return e.getStatus();
 					}
 					catch(Exception e) {
 						return new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Could not create project '" + projectName + "'", e);
+					}
+					finally {
+						if (monitor != null)
+							monitor.done();
 					}
 					
 					return Status.OK_STATUS;

@@ -1,6 +1,6 @@
 <%
 	if (!flexBuilder)
-		throw new org.granite.wizard.CancelFileGenerationException();
+		throw new org.granite.generator.CancelFileGenerationException();
 
 %><?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <actionScriptProperties

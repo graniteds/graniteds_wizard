@@ -18,7 +18,7 @@
   along with this library; if not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.granite.wizard;
+package org.granite.generator;
 
 /**
  * @author Franck WOLFF

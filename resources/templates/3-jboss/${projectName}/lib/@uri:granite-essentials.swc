@@ -1,1 +1,1 @@
-uri = "http://repo2.maven.org/maven2/org/graniteds/granite-essentials-swc/2.3.0.GA/granite-essentials-swc-2.3.0.GA.swc"
+uri = Fs.mvn2Uri("org.graniteds:granite-essentials-swc:swc:" + GDS_REV)

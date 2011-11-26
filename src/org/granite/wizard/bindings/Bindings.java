@@ -20,10 +20,6 @@
 
 package org.granite.wizard.bindings;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +29,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.codehaus.groovy.control.CompilationFailedException;
-import org.codehaus.groovy.runtime.InvokerHelper;
+import org.granite.generator.ScriptingEngine;
 import org.granite.wizard.util.PropertiesUtil;
 
 /**
@@ -47,22 +43,15 @@ public class Bindings {
 	private final List<Variable> variables;
 	private final Map<String, Map<String, Object>> variablesMap;
 	
-	@SuppressWarnings("unchecked")
-	public Bindings(File source) throws CompilationFailedException, IOException {
-		
+	public Bindings(File source, ScriptingEngine engine) throws CompilationFailedException, IOException {
 		this.source = source;
 		
-		GroovyShell shell = new GroovyShell(getClass().getClassLoader());
-		Script script = shell.parse(source);
-		Script scriptInstance = InvokerHelper.createScript(script.getClass(), new Binding());
-		scriptInstance.run();
-		
-		this.variablesMap = scriptInstance.getBinding().getVariables();
+		this.variablesMap = engine.evaluate(source, null);
 		
 		Properties defaultProperties = loadDefaultProperties();
 		this.variables = new ArrayList<Variable>();
 		for (Map.Entry<String, Map<String, Object>> entry : variablesMap.entrySet()) {
-			Variable variable = new Variable(scriptInstance.getBinding(), entry.getKey(), defaultProperties.getProperty(entry.getKey()));
+			Variable variable = new Variable(entry.getKey(), entry.getValue(), defaultProperties.getProperty(entry.getKey()));
 			variables.add(variable);
 		}
 	}

@@ -1,1 +1,1 @@
-uri = "http://repo2.maven.org/maven2/org/graniteds/granite-core/2.3.0.GA/granite-core-2.3.0.GA.jar"
+uri = Fs.mvn2Uri("org.graniteds:granite-core:" + GDS_REV)

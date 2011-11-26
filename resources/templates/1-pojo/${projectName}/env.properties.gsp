@@ -1,8 +1,6 @@
 <%
-	import org.granite.generator.Fs;
-
 	if (!antBuild)
-		throw new org.granite.wizard.CancelFileGenerationException();
+		throw new org.granite.generator.CancelFileGenerationException();
 
 %>project.name = ${Fs.escapeBackslashes(projectName)}
 flex.home = ${Fs.escapeBackslashes(flexSdkDir)}
