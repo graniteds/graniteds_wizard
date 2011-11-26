@@ -1,1 +1,1 @@
-uri = Fs.mvn2Uri("org.graniteds:granite-hibernate:" + GDS_REV)
+uri = "mvn:org.graniteds:granite-hibernate:" + GRANITEDS_VERSION;

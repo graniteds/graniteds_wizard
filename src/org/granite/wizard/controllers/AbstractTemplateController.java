@@ -77,7 +77,7 @@ public abstract class AbstractTemplateController {
 		File projectDir = new File(project.getLocationURI());
 		monitor.setWorkRemaining(200);
 		createProjectResources(projectDir, projectTemplateDirectory.toURI(), projectTemplateDirectory, monitor, variables);
-		monitor.worked(200);
+		monitor.done();
 	}
 	
 	protected void createProjectResources(File projectDir, URI projectTemplateURI, File directory, SubMonitor monitor, Map<String, Object> variables) throws IOException {
@@ -88,8 +88,6 @@ public abstract class AbstractTemplateController {
 			
 			if (template.ignoreFile(file))
 				continue;
-			
-			boolean deleteAfterCopy = false;
 			
 			String relativePath = projectTemplateURI.relativize(file.toURI()).getPath();
 			if (relativePath.contains("${"))
@@ -104,25 +102,10 @@ public abstract class AbstractTemplateController {
 			}
 			else {
 				if (file.getName().startsWith("@uri:")) {
-					URI uri = resolveUri(file, variables);
-					
-					monitor.worked(5);
-					
-					if (uri == null) // CancelFileGenerationException.
-						continue;
-
 					relativePath = projectTemplateURI.relativize(file.getParentFile().toURI()).getPath() + file.getName().substring(5);
-					
-					if ("file".equals(uri.getScheme())) {
-						file = resolveFile(template.getResourcesDirectory(), uri);
-						monitor.worked(5);
-					}
-					else if ("http".equals(uri.getScheme()))
-						file = getRepository().getFile(uri, monitor.newChild(5));
-					else
-						throw new IOException("Unsupported scheme uri: " + uri + " in file: " + file);
-					
-					assert(file != null);
+					file = resolveUri(file, variables, monitor.newChild(10));
+					if (file == null) // CancelFileGenerationException.
+						continue;
 				}
 				
 				boolean isTemplate = relativePath.endsWith(".gsp");
@@ -137,8 +120,6 @@ public abstract class AbstractTemplateController {
 				else {
 					monitor.setTaskName("Copying file: " + relativePath);
 					copyFile(file, projectFile);
-					if (deleteAfterCopy)
-						file.delete();
 				}
 				
 				monitor.worked(5);
@@ -171,23 +152,88 @@ public abstract class AbstractTemplateController {
 		return template.getEngine().evaluate(s, variables);
 	}
 	
-	protected URI resolveUri(File uriFile, Map<String, Object> variables) throws IOException {
+	protected File resolveUri(File uriFile, Map<String, Object> variables, SubMonitor monitor) throws IOException {
+		File file = null;
+		
+		monitor.setWorkRemaining(100);
+		
+		Object uriVariable = null;
 		try {
-			Object uri = template.getEngine().evaluate(uriFile, variables).get("uri");
-			if (uri == null)
+			uriVariable = template.getEngine().evaluate(uriFile, variables).get("uri");
+			if (uriVariable == null)
 				throw new IOException("Uri file: " + uriFile + " does not declare a \"uri\" variable");
 			
-			try {
-				return new URI(uri.toString());
-			}
-			catch (URISyntaxException e) {
-				throw new IOException("Uri file: " + uriFile + " declares an invalid \"uri\" variable: " + uri, e);
-			}
+			monitor.worked(25);
+			
+			URI uri = new URI(uriVariable.toString());
+			
+			if ("mvn".equals(uri.getScheme()))
+				file = getRepository().getFile(mvn2Http(uri), monitor.newChild(75));
+			else if ("http".equals(uri.getScheme()))
+				file = getRepository().getFile(uri, monitor.newChild(75));
+			else if ("file".equals(uri.getScheme()))
+				file = resolveFile(template.getResourcesDirectory(), uri);
+			else
+				throw new IOException("Unsupported scheme uri: " + uri + " in file: " + file);
 	    }
 	    catch (CancelFileGenerationException e) {
-	    	return null;
+	    	file = null;
 	    }
+		catch (URISyntaxException e) {
+			throw new IOException("Uri file: " + uriFile + " declares an invalid \"uri\" variable: " + uriVariable, e);
+		}
+		
+		monitor.done();
+		
+		return file;
 	}
+	
+	protected URI mvn2Http(URI mvnUri) {
+		
+		String repository = (String)template.getEngine().getGlobalVariable("DEFAULT_MAVEN_REPOSITORY");
+		if (repository == null)
+			repository = "http://repo2.maven.org/maven2/";
+		
+		String coordinate = mvnUri.getRawSchemeSpecificPart();
+		int repositoryEnd = coordinate.indexOf('!');
+		if (repositoryEnd != -1) {
+			repository = coordinate.substring(0, repositoryEnd);
+			coordinate = coordinate.substring(repositoryEnd + 1);
+		}
+		
+    	String[] tokens = coordinate.split(":", 5);
+    	if (tokens.length < 3) {
+    		throw new IllegalArgumentException(
+    			"Illegal Maven coordinate: " + coordinate +
+    			" (must be \"groupId:artifactId[:packaging[:classifier]]:version\")"
+    		);
+    	}
+    	
+    	String groupId = tokens[0];
+    	String artifactId = tokens[1];
+    	String version = tokens[tokens.length - 1];
+    	String packaging = (tokens.length > 3 ? tokens[2] : "jar");
+    	String classifier = (tokens.length > 4 ? tokens[3] : null);
+    	
+    	StringBuilder path = new StringBuilder(repository);
+    	if (!repository.endsWith("/"))
+    		path.append('/');
+    	path.append(groupId.replace('.', '/')).append('/');
+    	path.append(artifactId).append('/');
+    	path.append(version).append('/');
+    	
+    	path.append(artifactId).append('-').append(version);
+    	if (classifier != null)
+    		path.append('-').append(classifier);
+    	path.append('.').append(packaging);
+    	
+    	try {
+    		return new URI(path.toString());
+    	}
+    	catch (URISyntaxException e) {
+    		throw new RuntimeException("Could not create URI from Maven coordinate: " + coordinate, e);
+    	}
+    }
 	
 	protected File resolveFile(File parent, URI uri) throws FileNotFoundException {
 		String path = uri.getSchemeSpecificPart();

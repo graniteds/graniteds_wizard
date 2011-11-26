@@ -51,7 +51,7 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 
 	private static final String TEMPLATES = "resources/templates";
 	private static final String TEMPLATES_PROPERTIES = "templates.properties";
-	private static final String PROLOG_GROOVY = "prolog.groovy";
+	private static final String GLOBAL_GROOVY = "global.groovy";
 	
 	private IConfigurationElement configurationElement = null;
 	
@@ -118,7 +118,7 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 		// Create a scripting engine and load prolog.groovy.
 		engine = ScriptingEngineFactory.createInstance();
 		try {
-			engine.load(new File(templatesDirectory, PROLOG_GROOVY), null);
+			engine.load(new File(templatesDirectory, GLOBAL_GROOVY), null);
 		}
 		catch (IOException e) {
 			throw new WizardException("Could not load prolog script: ", e);

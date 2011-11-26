@@ -166,6 +166,11 @@ public class GroovyEngine implements ScriptingEngine {
 		return expression;
 	}
 	
+	@Override
+	public synchronized Object getGlobalVariable(String name) {
+		return globalVariables.get(name);
+	}
+
 	protected void checkVariableNames(Map<String, Object> variables) {
         if (variables.containsKey("out"))
         	throw new RuntimeException("'out' is a reserved variable name for template execution");

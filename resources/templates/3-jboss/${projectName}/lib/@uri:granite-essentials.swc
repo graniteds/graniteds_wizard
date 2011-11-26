@@ -1,1 +1,1 @@
-uri = Fs.mvn2Uri("org.graniteds:granite-essentials-swc:swc:" + GDS_REV)
+uri = "mvn:org.graniteds:granite-essentials-swc:swc:" + GRANITEDS_VERSION;
