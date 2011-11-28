@@ -1,0 +1,1 @@
+uri = "mvn:org.graniteds:granite-core:" + GRANITEDS_VERSION
