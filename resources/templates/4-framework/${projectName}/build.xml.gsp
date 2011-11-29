@@ -99,7 +99,7 @@
 	    	<classpath location="bin-java"/>
 	        <fileset dir="bin-java">
 	            <include name="org/example/entities/*.class"/>
-	        	<exclude name="org/example/entities/*$*.class"/>
+	        	<exclude name="org/example/entities/*\$*.class"/>
 	    	</fileset>
 	    </openjpac>
 	</target><%
@@ -108,7 +108,7 @@
 	<!--
 	 ! Build WAR.
 	 !-->
-	<target name="build.war"<% if (!flexBuilder) {%> depends="build.flex" <% } else { %> depends="ivy.resolve"<% } %>>
+	<target name="build.war" depends="ivy.resolve<% if (!flexBuilder) {%>, build.flex<% } %>">
 
 		<mkdir dir="\${war.dir}"/>
 		<copy todir="\${war.dir}">
