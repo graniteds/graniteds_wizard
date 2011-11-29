@@ -62,16 +62,17 @@ public class CheckboxControl extends AbstractControl<Button> {
 			public void handleEvent(Event e) {
 				if (((VariableChangeEvent)e).source == checkbox)
 					return;
-				
-				final boolean enabled = !variable.isDisabled();
-				checkbox.setEnabled(enabled);
-				setLabelEnabled(enabled);
+
 				boolean value = variable.getValueAsBoolean();
 				if (checkbox.getSelection() != value) {
 					checkbox.removeSelectionListener(modifyListener);
 					checkbox.setSelection(value);
 					checkbox.addSelectionListener(modifyListener);
 				}
+				
+				final boolean enabled = !variable.isDisabled();
+				checkbox.setEnabled(enabled);
+				setLabelEnabled(enabled);
 			}
 		});
 

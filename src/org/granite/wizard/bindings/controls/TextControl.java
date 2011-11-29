@@ -67,16 +67,17 @@ public class TextControl extends AbstractControl<Text> {
 			public void handleEvent(Event e) {
 				if (((VariableChangeEvent)e).source == text)
 					return;
-				
-				final boolean enabled = !variable.isDisabled();
-				text.setEnabled(enabled);
-				setLabelEnabled(enabled);
+
 				String value = variable.getValueAsString();
 				if (!text.getText().equals(value)) {
 					text.removeModifyListener(modifyListener);
 					text.setText(value);
 					text.addModifyListener(modifyListener);
 				}
+				
+				final boolean enabled = !variable.isDisabled();
+				text.setEnabled(enabled);
+				setLabelEnabled(enabled);
 			}
 		});
 		

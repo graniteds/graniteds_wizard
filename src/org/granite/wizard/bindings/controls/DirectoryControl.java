@@ -104,17 +104,17 @@ public class DirectoryControl extends AbstractControl<Composite> {
 				if (((VariableChangeEvent)e).source == box)
 					return;				
 				
-				final boolean enabled = !variable.isDisabled();
-				text.setEnabled(enabled);
-				button.setEnabled(enabled);
-				setLabelEnabled(enabled);
-				
 				String value = variable.getValueAsString();
 				if (!text.getText().equals(value)) {
 					text.removeModifyListener(modifyListener);
 					text.setText(value);
 					text.addModifyListener(modifyListener);
 				}
+				
+				final boolean enabled = !variable.isDisabled();
+				text.setEnabled(enabled);
+				button.setEnabled(enabled);
+				setLabelEnabled(enabled);
 			}
 		});
 

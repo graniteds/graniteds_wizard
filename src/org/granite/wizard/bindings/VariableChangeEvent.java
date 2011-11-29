@@ -31,8 +31,20 @@ public class VariableChangeEvent extends Event {
 	public static int ID = 666666;
 	
 	public final Widget source;
+	public final int index;
+	
+	public VariableChangeEvent() {
+		this(null, 0);
+	}
 	
 	public VariableChangeEvent(Widget source) {
+		this(source, 0);
+	}
+	
+	public VariableChangeEvent(Widget source, int index) {
+		if (index < 0)
+			throw new IllegalArgumentException("index must be posityive or null: " + index);
 		this.source = source;
+		this.index = index;
 	}
 }

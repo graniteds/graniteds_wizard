@@ -21,7 +21,9 @@
 package org.granite.wizard.bindings.controls;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -50,12 +52,16 @@ public class ComboControl extends AbstractControl<Combo> {
 		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
 		gridData.widthHint = widthHint;
 		combo.setLayoutData(gridData);
-		Map<String, String> items = variable.getPossibleValues();
+		
+		Map<String, String> items = checkNull(variable.getPossibleValues());
 		String[] labels = items.keySet().toArray(new String[0]);
 		String[] values = items.values().toArray(new String[0]);
+		
 		combo.setItems(labels);
 		
-		if (values.length > 0) {
+		if (labels.length == 0)
+			variable.setValue(null);
+		else {
 			int selected = indexOf(values, variable.getValueAsString());
 			if (selected == -1) {
 				combo.select(0);
@@ -65,15 +71,21 @@ public class ComboControl extends AbstractControl<Combo> {
 				combo.select(selected);
 		}
 
-		final boolean enabled = !variable.isDisabled();
+		final boolean enabled = (labels.length > 0 && !variable.isDisabled());
 		combo.setEnabled(enabled);
 		setLabelEnabled(enabled);
 		
 		final SelectionAdapter modifyListener = new SelectionAdapter() {
 			@Override
             public void widgetSelected(SelectionEvent e) {
-				variable.setValue(variable.getPossibleValues().get(combo.getText()));
-                combo.getParent().notifyListeners(VariableChangeEvent.ID, new VariableChangeEvent(combo));
+				String label = combo.getText();
+				if (label != null) {
+					String value = variable.getPossibleValues().get(label);
+					if (value != null && !value.equals(variable.getValue())) {
+						variable.setValue(value);
+		                combo.getParent().notifyListeners(VariableChangeEvent.ID, new VariableChangeEvent(combo));
+					}
+				}
             }
         };
 		combo.addSelectionListener(modifyListener);
@@ -84,25 +96,50 @@ public class ComboControl extends AbstractControl<Combo> {
 				if (((VariableChangeEvent)e).source == combo)
 					return;
 				
-				final boolean enabled = !variable.isDisabled();
-				combo.setEnabled(enabled);
-				setLabelEnabled(enabled);
+				Map<String, String> items = checkNull(variable.getPossibleValues());
+				String[] labels = items.keySet().toArray(new String[0]);				
+				String[] values = items.values().toArray(new String[0]);
 				
-				Map<String, String> items = variable.getPossibleValues();
-				String[] labels = items.keySet().toArray(new String[0]);
+				combo.removeSelectionListener(modifyListener);
+
+				boolean valueChanged = false;
+				
+				// Items list has changed.
 				if (!Arrays.equals(combo.getItems(), labels)) {
-					combo.removeSelectionListener(modifyListener);
 					combo.setItems(labels);
-					combo.addSelectionListener(modifyListener);
+					combo.select(0);
+				}
+				
+				// Update value and selection.
+				String value = variable.getValueAsString();
+				if (value == null) {
+					if (values.length > 0) {
+						variable.setValue(values[0]);
+						valueChanged = true;
+					}
+				}
+				else if (values.length == 0) {
+					variable.setValue(null);
+					valueChanged = true;
+				}
+				else if (!value.equals(values[combo.getSelectionIndex()])) {
+					int selected = indexOf(values, value);
+					if (selected == -1) {
+						variable.setValue(values[0]);
+						valueChanged = true;
+					}
+					else
+						combo.select(selected);
 				}
 
-				String value = variable.getValueAsString();
-				if (value != null && !value.equals(items.get(combo.getText()))) {
-					String[] values = items.values().toArray(new String[0]);
-					combo.removeSelectionListener(modifyListener);
-					combo.select(indexOf(values, variable.getValueAsString()));
-					combo.addSelectionListener(modifyListener);
-				}
+				final boolean enabled = (labels.length > 0 && !variable.isDisabled());
+				combo.setEnabled(enabled);
+				setLabelEnabled(enabled);
+
+				combo.addSelectionListener(modifyListener);
+				
+				if (valueChanged)
+					combo.getParent().notifyListeners(VariableChangeEvent.ID, new VariableChangeEvent(combo, ((VariableChangeEvent)e).index + 1));
 			}
 		});
 
@@ -120,5 +157,17 @@ public class ComboControl extends AbstractControl<Combo> {
 			}
 		}
 		return selected;
+	}
+	
+	private static Map<String, String>  checkNull(Map<String, String> items) {
+		if (items == null)
+			items = new HashMap<String, String>();
+		else {
+			for (Entry<String, String> value : items.entrySet()) {
+				if (value.getKey() == null || value.getValue() == null)
+					throw new RuntimeException("Null not allowed in key/value entries: " + items);
+			}
+		}
+		return items;
 	}
 }

@@ -119,8 +119,8 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 		        	if (labelText != null) {
 			            Label label = new Label(composite, SWT.NONE);
 			            label.setFont(composite.getFont());
-			            if (labelText.startsWith("|- "))
-			            	labelText = "  \u21b3 " + labelText.substring(2);
+			            if (variable.getIndentation() > 0)
+			            	labelText = "  \u21b3 " + labelText;
 			            label.setText(labelText + ":");
 			            label.setToolTipText(variable.getTooltip());
 			            
@@ -131,6 +131,12 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 		        composite.addListener(VariableChangeEvent.ID, new Listener() {
 					@Override
 					public void handleEvent(Event e) {
+						// Make sure we are not trapped in an infinite event loop.
+						if (e instanceof VariableChangeEvent) {
+							if (((VariableChangeEvent)e).index > 100)
+								throw new RuntimeException("Change event index is > 100 (likely a circular dependency)");
+						}
+						
 						// Re-dispatch change event to all controls so they can update their
 						// values.
 						for (Control control : ((Composite)e.widget).getChildren())
@@ -161,6 +167,9 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 						bindings.saveDefaultProperties();
 					}
 				});
+				
+		        for (Control control : composite.getChildren())
+					control.notifyListeners(VariableChangeEvent.ID, new VariableChangeEvent());
 			}
 
 			@Override

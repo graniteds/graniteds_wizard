@@ -36,6 +36,8 @@ import org.granite.wizard.bindings.controls.Controls;
  * @author Franck WOLFF
  */
 public class Variable {
+
+	private static final String INDENT_MARK = "|- ";
 	
 	private final String name;
 	private final Map<String, Object> values;
@@ -62,7 +64,26 @@ public class Variable {
 	
 	public String getLabel() {
 		Object o = internalGet("label");
-		return (o != null ? o.toString() : null);
+		if (o == null)
+			return null;
+		String label = o.toString();
+		int indentation = 0;
+		while (label.startsWith(INDENT_MARK, indentation * INDENT_MARK.length()))
+			indentation++;
+		if (indentation == 0)
+			return label;
+		return label.substring(indentation * INDENT_MARK.length());
+	}
+	
+	public int getIndentation() {
+		Object o = internalGet("label");
+		if (o == null)
+			return 0;
+		String label = o.toString();
+		int indentation = 0;
+		while (label.startsWith(INDENT_MARK, indentation * INDENT_MARK.length()))
+			indentation++;
+		return indentation;
 	}
 	
 	public String getTooltip() {
