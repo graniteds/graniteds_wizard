@@ -20,8 +20,7 @@
 
 		<mkdir dir="\${war.dir}"/>
 		<copy todir="\${war.dir}">
-			<fileset dir="war" includes="**"/>
-			<fileset dir="\${flex.bin.dir}" includes="**" excludes="**/*.cache"/>
+			<fileset dir="WebContent" includes="**" excludes="**/*.cache"/>
 		</copy>
 		
 		<zip destfile="\${war.dir}.war">
@@ -49,11 +48,10 @@
 		<property name="FLEX_HOME" value="\${flex.home}"/>
 		<taskdef resource="flexTasks.tasks" classpath="\${flex.home}/ant/lib/flexTasks.jar" />
 		
-		<mkdir dir="\${flex.bin.dir}"/>
 		<mxmlc
             file="\${flex.src.dir}/\${project.name}.mxml"
-            output="\${flex.bin.dir}/\${project.name}.swf"
-            services="war/WEB-INF/flex/services-config.xml"
+            output="WebContent/\${project.name}.swf"
+            services="WebContent/WEB-INF/flex/services-config.xml"
             context-root="/\${project.name}"
             keep-generated-actionscript="false"
             debug="false"
@@ -76,7 +74,7 @@
 
 		<html-wrapper
 			title="\${project.name}"
-		    output="\${flex.bin.dir}"
+		    output="WebContent"
 			file="\${project.name}.html"
 		    application="\${project.name}"
 		    swf="${projectName}"

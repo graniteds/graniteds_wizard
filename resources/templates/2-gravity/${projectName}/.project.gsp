@@ -4,12 +4,7 @@
 	<comment></comment>
 	<projects>
 	</projects>
-	<buildSpec>
-		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand><%
+	<buildSpec><%
 if (flexBuilder) { %>
 		<buildCommand>
 			<name>com.adobe.flexbuilder.project.flexbuilder</name>
@@ -18,8 +13,7 @@ if (flexBuilder) { %>
 		</buildCommand><%
 } %>
 	</buildSpec>
-	<natures>
-		<nature>org.eclipse.jdt.core.javanature</nature><%
+	<natures><%
 if (flexBuilder) { %>
 		<nature>com.adobe.flexbuilder.project.flexnature</nature>
 		<nature>com.adobe.flexbuilder.project.actionscriptnature</nature><%
