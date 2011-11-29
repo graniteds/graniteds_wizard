@@ -170,12 +170,17 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 				try {
 					setErrorMessage(null);
 					int index = templatesList.getSelectionIndex();
-					ProjectTemplate template = templates.get(index);
-					text.setText(template.getDescription());
-					controller = template.getController().newInstance();
-					controller.initialize((DynamicProjectWizard)getWizard(), template);
-					setPageComplete(true);
-					
+					if (index == -1) {
+						controller = null;
+						setPageComplete(false);
+					}
+					else {
+						ProjectTemplate template = templates.get(index);
+						text.setText(template.getDescription());
+						controller = template.getController().newInstance();
+						controller.initialize((DynamicProjectWizard)getWizard(), template);
+						setPageComplete(true);
+					}
 				}
 				catch (Exception e) {
 					controller = null;
