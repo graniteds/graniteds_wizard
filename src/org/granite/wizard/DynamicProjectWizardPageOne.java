@@ -33,12 +33,17 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationEvent;
+import org.eclipse.swt.browser.LocationListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.browser.IWebBrowser;
+import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.granite.generator.ScriptingEngine;
 import org.granite.generator.ScriptingEngineFactory;
 import org.granite.wizard.controllers.AbstractTemplateController;
@@ -160,10 +165,36 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 				templatesList.add(template.getName());
 		}
 		
-		final Text text = new Text(composite, SWT.MULTI | SWT.WRAP | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL);
+		final Browser browser = new Browser(composite, SWT.READ_ONLY | SWT.BORDER);
+		final String blankLocation = browser.getUrl();
+		browser.addLocationListener(new LocationListener() {
+			@Override
+			public void changing(LocationEvent event) {
+				String url = event.location;
+				if (url != null && !url.equals(blankLocation)) {
+					event.doit = false;
+					try {
+						final IWebBrowser externalBrowser = PlatformUI.getWorkbench().getBrowserSupport().createBrowser(
+							IWorkbenchBrowserSupport.AS_EXTERNAL,
+							getClass().getName(),
+							"",
+							""
+						);
+						externalBrowser.openURL(new URL(url));
+					}
+					catch (Exception e) {
+						// ignore...
+					}
+				}
+			}
+
+			@Override
+			public void changed(LocationEvent event) {
+			}
+		});
 		GridData textGridData = new GridData(GridData.FILL_BOTH);
 		textGridData.widthHint = 180;
-		text.setLayoutData(textGridData);
+		browser.setLayoutData(textGridData);
 
 		templatesList.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -176,7 +207,7 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 					}
 					else {
 						ProjectTemplate template = templates.get(index);
-						text.setText(template.getDescription());
+						browser.setText("<div style='font-size: 14px'>" + template.getDescription() + "</div>", true);
 						controller = template.getController().newInstance();
 						controller.initialize((DynamicProjectWizard)getWizard(), template);
 						setPageComplete(true);
