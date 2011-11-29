@@ -10,7 +10,7 @@
   version="6">
   <compiler additionalCompilerArguments="
       -locale en_US
-      -services ../war/WEB-INF/flex/services-config.xml
+      -services ../WebContent/WEB-INF/flex/services-config.xml
       -context-root /${projectName}
       -include-libraries ../lib/granite-essentials.swc
     "
@@ -23,7 +23,7 @@
     htmlHistoryManagement="true"
     htmlPlayerVersionCheck="true"
     includeNetmonSwc="false"
-    outputFolderPath="${flexBinDir}"
+    outputFolderPath="WebContent"
     sourceFolderPath="${flexSrcDir}"
     strict="true"
     targetPlayerVersion="0.0.0"

@@ -26,6 +26,7 @@ flexSrcDir = [
 	validate: { value -> value != null && value.matches("^[a-zA-Z0-9_\\-]+\$") },
 	errorMessage: "Must be a valid directory name"
 ]
+/*
 flexBinDir = [
 	label: "Flex binary directory",
 	tooltip: "Name of the project directory for Flex binaries (compiled swf)",
@@ -35,6 +36,7 @@ flexBinDir = [
 	validate: { value -> value != null && value.matches("^[a-zA-Z0-9_\\-]+\$") },
 	errorMessage: "Must be a valid directory name"
 ]
+*/
 flexBuilder = [
 	label: "Configure Flash Builder",
 	tooltip: "Create Flash Builder configuration files and add Flex nature and builder",
