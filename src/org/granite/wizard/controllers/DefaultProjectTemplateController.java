@@ -133,8 +133,8 @@ public class DefaultProjectTemplateController extends AbstractTemplateController
 					public void handleEvent(Event e) {
 						// Make sure we are not trapped in an infinite event loop.
 						if (e instanceof VariableChangeEvent) {
-							if (((VariableChangeEvent)e).index > 100)
-								throw new RuntimeException("Change event index is > 100 (likely a circular dependency)");
+							if (((VariableChangeEvent)e).recursion > 100)
+								throw new RuntimeException("Change event recursion is > 100 (likely a circular dependency)");
 						}
 						
 						// Re-dispatch change event to all controls so they can update their

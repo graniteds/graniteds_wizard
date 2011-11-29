@@ -31,7 +31,7 @@ public class VariableChangeEvent extends Event {
 	public static int ID = 666666;
 	
 	public final Widget source;
-	public final int index;
+	public final int recursion;
 	
 	public VariableChangeEvent() {
 		this(null, 0);
@@ -41,10 +41,10 @@ public class VariableChangeEvent extends Event {
 		this(source, 0);
 	}
 	
-	public VariableChangeEvent(Widget source, int index) {
-		if (index < 0)
-			throw new IllegalArgumentException("index must be posityive or null: " + index);
+	public VariableChangeEvent(Widget source, int recursion) {
+		if (recursion < 0)
+			throw new IllegalArgumentException("recursion must be posityive or null: " + recursion);
 		this.source = source;
-		this.index = index;
+		this.recursion = recursion;
 	}
 }

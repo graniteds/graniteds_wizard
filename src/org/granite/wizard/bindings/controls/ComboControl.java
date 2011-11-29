@@ -139,7 +139,7 @@ public class ComboControl extends AbstractControl<Combo> {
 				combo.addSelectionListener(modifyListener);
 				
 				if (valueChanged)
-					combo.getParent().notifyListeners(VariableChangeEvent.ID, new VariableChangeEvent(combo, ((VariableChangeEvent)e).index + 1));
+					combo.getParent().notifyListeners(VariableChangeEvent.ID, new VariableChangeEvent(combo, ((VariableChangeEvent)e).recursion + 1));
 			}
 		});
 
