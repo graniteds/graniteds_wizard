@@ -20,17 +20,9 @@
 
 package org.granite.wizard.bindings;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.RegistryFactory;
-import org.eclipse.wst.server.core.IRuntime;
-import org.eclipse.wst.server.core.IRuntimeType;
-import org.eclipse.wst.server.core.IServer;
-import org.eclipse.wst.server.core.IServerType;
-import org.eclipse.wst.server.core.ServerCore;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
@@ -57,51 +49,51 @@ public class Eclipse {
 		return new Version(-1, -1, -1, "null");
 	}
 
-	public static IRuntimeType[] getRuntimeTypes() {
-		return ServerCore.getRuntimeTypes();
-	}
-
-	public static Map<String, String> getRuntimeTypesMap() {
-		IRuntimeType[] runtimeTypes = ServerCore.getRuntimeTypes();
-		Map<String, String> serverTypesMap = new HashMap<String, String>(runtimeTypes.length);
-		for (IRuntimeType runtimeType : runtimeTypes)
-			serverTypesMap.put(runtimeType.getName(), runtimeType.getId());
-		return serverTypesMap;
-	}
-
-	public static IRuntime[] getRuntimes() {
-		return ServerCore.getRuntimes();
-	}
-
-	public static Map<String, String> getRuntimesMap() {
-		IRuntime[] runtimes = ServerCore.getRuntimes();
-		Map<String, String> runtimesMap = new HashMap<String, String>(runtimes.length);
-		for (IRuntime runtime : runtimes)
-			runtimesMap.put(runtime.getName(), runtime.getId());
-		return runtimesMap;
-	}
-
-	public static IServerType[] getServerTypes() {
-		return ServerCore.getServerTypes();
-	}
-
-	public static Map<String, String> getServerTypesMap() {
-		IServerType[] serverTypes = ServerCore.getServerTypes();
-		Map<String, String> serverTypesMap = new HashMap<String, String>(serverTypes.length);
-		for (IServerType serverType : serverTypes)
-			serverTypesMap.put(serverType.getName(), serverType.getId());
-		return serverTypesMap;
-	}
-
-	public static IServer[] getServers() {
-		return ServerCore.getServers();
-	}
-
-	public static Map<String, String> getServersMap() {
-		IServer[] servers = ServerCore.getServers();
-		Map<String, String> serversMap = new HashMap<String, String>(servers.length);
-		for (IServer server : servers)
-			serversMap.put(server.getName(), server.getId());
-		return serversMap;
-	}
+//	public static IRuntimeType[] getRuntimeTypes() {
+//		return ServerCore.getRuntimeTypes();
+//	}
+//
+//	public static Map<String, String> getRuntimeTypesMap() {
+//		IRuntimeType[] runtimeTypes = ServerCore.getRuntimeTypes();
+//		Map<String, String> serverTypesMap = new HashMap<String, String>(runtimeTypes.length);
+//		for (IRuntimeType runtimeType : runtimeTypes)
+//			serverTypesMap.put(runtimeType.getName(), runtimeType.getId());
+//		return serverTypesMap;
+//	}
+//
+//	public static IRuntime[] getRuntimes() {
+//		return ServerCore.getRuntimes();
+//	}
+//
+//	public static Map<String, String> getRuntimesMap() {
+//		IRuntime[] runtimes = ServerCore.getRuntimes();
+//		Map<String, String> runtimesMap = new HashMap<String, String>(runtimes.length);
+//		for (IRuntime runtime : runtimes)
+//			runtimesMap.put(runtime.getName(), runtime.getId());
+//		return runtimesMap;
+//	}
+//
+//	public static IServerType[] getServerTypes() {
+//		return ServerCore.getServerTypes();
+//	}
+//
+//	public static Map<String, String> getServerTypesMap() {
+//		IServerType[] serverTypes = ServerCore.getServerTypes();
+//		Map<String, String> serverTypesMap = new HashMap<String, String>(serverTypes.length);
+//		for (IServerType serverType : serverTypes)
+//			serverTypesMap.put(serverType.getName(), serverType.getId());
+//		return serverTypesMap;
+//	}
+//
+//	public static IServer[] getServers() {
+//		return ServerCore.getServers();
+//	}
+//
+//	public static Map<String, String> getServersMap() {
+//		IServer[] servers = ServerCore.getServers();
+//		Map<String, String> serversMap = new HashMap<String, String>(servers.length);
+//		for (IServer server : servers)
+//			serversMap.put(server.getName(), server.getId());
+//		return serversMap;
+//	}
 }
