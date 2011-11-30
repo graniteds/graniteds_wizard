@@ -101,7 +101,7 @@
 	        <property name="javax.persistence.jdbc.password" value="APP"/>
 	        <property name="javax.persistence.jdbc.user" value="APP"/>
 	        <property name="eclipselink.target-database" value="JavaDB"/>
-	        <property name="eclipselink.ddl-generation" value="create-tables"/>
+	        <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
 	        <property name="eclipselink.ddl-generation.output-mode" value="database"/>
 	        <property name="eclipselink.create-ddl-jdbc-file-name" value="create.sql"/>
       	</properties>

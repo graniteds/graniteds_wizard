@@ -1,0 +1,3 @@
+if (javaPersistence != "OpenJPA")
+	throw new org.granite.generator.CancelFileGenerationException()
+uri = "mvn:org.graniteds:granite-eclipselink:" + GRANITEDS_VERSION

@@ -1,0 +1,3 @@
+if (targetPlatform.startsWith("JB4") || targetPlatform.startsWith("JB5") || targetPlatform.indexOf("(EE6)") >= 0)
+	throw new org.granite.generator.CancelFileGenerationException()
+uri = "mvn:org.slf4j:slf4j-api:1.6.4"

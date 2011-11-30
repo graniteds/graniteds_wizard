@@ -110,17 +110,9 @@
 	 !-->
 	<target name="build.war" depends="ivy.resolve<% if (!flexBuilder) {%>, build.flex<% } %>">
 
-		<mkdir dir="\${war.dir}"/>
-		<copy todir="\${war.dir}">
-			<fileset dir="WebContent" includes="**"/>
-			<fileset dir="\${flex.bin.dir}" includes="**" excludes="**/*.cache"/>
-		</copy>
-		<copy todir="\${war.dir}/WEB-INF/classes">
-			<fileset dir="\${java.bin.dir}" includes="**"/>
-		</copy>
-		<copy todir="\${war.dir}/WEB-INF/lib">
+		<copy todir="WebContent/WEB-INF/lib">
 			<fileset dir="lib" includes="*.jar"><%
-	if (targetPlatform.startsWith("JB4") || targetPlatform.startsWith("JB5") || targetPlatform.indexOf("(EE6)") >= 0) {%>
+			if (targetPlatform.startsWith("JB4") || targetPlatform.startsWith("JB5") || targetPlatform.indexOf("(EE6)") >= 0) {%>
 				<exclude name="hibernate*.jar"/>
 				<exclude name="antlr.jar"/>
 				<exclude name="dom4j.jar"/>
@@ -130,11 +122,19 @@
 				<exclude name="jsr250-api.jar"/>
 				<exclude name="validation-api.jar"/>
 				<exclude name="transaction-api.jar"/><%
-	}
-	if (targetPlatform.indexOf("(EE6)") >= 0) {%>
+			}
+			if (targetPlatform.indexOf("(EE6)") >= 0) {%>
 				<exclude name="jsf-api.jar"/><%
-	}%>
+			}%>
 			</fileset>			
+		</copy>
+		<mkdir dir="\${war.dir}"/>
+		<copy todir="\${war.dir}">
+			<fileset dir="WebContent" includes="**"/>
+			<fileset dir="\${flex.bin.dir}" includes="**" excludes="**/*.cache"/>
+		</copy>
+		<copy todir="\${war.dir}/WEB-INF/classes">
+			<fileset dir="\${java.bin.dir}" includes="**"/>
 		</copy>
 		
 		<zip destfile="\${war.dir}.war">

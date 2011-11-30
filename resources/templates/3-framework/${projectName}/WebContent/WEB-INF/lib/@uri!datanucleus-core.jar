@@ -1,0 +1,3 @@
+if (javaFramework != "DataNucleus")
+	throw new org.granite.generator.CancelFileGenerationException()
+uri = "mvn:org.datanucleus:datanucleus-core:3.0.3"
