@@ -1,0 +1,3 @@
+if (!targetPlatform.startsWith("TC") && !targetPlatform.startsWith("JY"))
+	throw new org.granite.generator.CancelFileGenerationException()
+uri = "mvn:log4j:log4j:1.2.15"

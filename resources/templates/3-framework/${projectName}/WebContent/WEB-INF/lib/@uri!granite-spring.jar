@@ -1,0 +1,3 @@
+if (javaFramework != "Spring3")
+	throw new org.granite.generator.CancelFileGenerationException()
+uri = "mvn:org.graniteds:granite-spring:" + GRANITEDS_VERSION

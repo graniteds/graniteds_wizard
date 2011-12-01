@@ -114,7 +114,7 @@ flexBinDir = [
 	tooltip: "Name of the project directory for Flex binaries (compiled swf)",
 	controlType: ControlType.TEXT,
 	type: String.class,
-	value: { "bin-" + flexSrcDir.value },
+	value: "WebContent",
 	validate: { value -> value != null && value.matches("^[a-zA-Z0-9_\\-]+\$") },
 	errorMessage: "Must be a valid directory name"
 ]
@@ -134,12 +134,12 @@ antBuild = [
 	value: true
 ]
 flexSdkDir = [
-	label: "|- Flex SDK directory",
-	tooltip: "Root directory of the Flex SDK used when compiling Flex sources without Flash Builder",
+	label: "|- Flex 4.5+ SDK directory",
+	tooltip: "Root directory of the Flex 4.5+ SDK used when compiling Flex sources outside Flash Builder",
 	controlType: ControlType.DIRECTORY,
 	type: File.class,
 	disabled: { !antBuild.value },	
-	value: "/path/to/flex_sdk_4",
+	value: "/path/to/flex_sdk_4_5",
 	validate: { value -> value.isDirectory() },
 	errorMessage: "Must be a valid directory"
 ]

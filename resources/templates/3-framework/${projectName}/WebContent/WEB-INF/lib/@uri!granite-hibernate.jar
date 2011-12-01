@@ -1,0 +1,3 @@
+if (javaPersistence != "Hibernate" || targetPlatform.startsWith("JB7"))
+	throw new org.granite.generator.CancelFileGenerationException()
+uri = "mvn:org.graniteds:granite-hibernate:" + GRANITEDS_VERSION

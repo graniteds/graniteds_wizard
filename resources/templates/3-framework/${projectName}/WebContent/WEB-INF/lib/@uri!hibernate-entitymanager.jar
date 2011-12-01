@@ -1,0 +1,3 @@
+if (targetPlatform.startsWith("JB") || javaPersistence != "Hibernate")
+	throw new org.granite.generator.CancelFileGenerationException()
+uri = "mvn:org.hibernate:hibernate-entitymanager:3.6.8.Final"

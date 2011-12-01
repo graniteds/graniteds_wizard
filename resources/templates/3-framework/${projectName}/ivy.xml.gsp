@@ -2,7 +2,7 @@
 <ivy-module version="2.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
-    <info organisation="org.test" module="${projectName}"/>
+    <info organisation="${packageName}" module="${projectName}"/>
     <dependencies>
 		<dependency org="org.graniteds" name="granite-core" rev="${GRANITEDS_VERSION}" transitive="false"/>
 		<dependency org="org.graniteds" name="granite-essentials-swc" rev="${GRANITEDS_VERSION}" transitive="false"/>
@@ -84,16 +84,14 @@
         <dependency org="log4j" name="log4j" rev="1.2.15" transitive="false"/><%
 	}
 	if (javaFramework == "Seam2" || (targetPlatform.startsWith("JB4") || targetPlatform.startsWith("JB5"))) {%>
-        <dependency org="org.hibernate" name="hibernate-validator" rev="3.1.0.GA" transitive="false"/>
-        <dependency org="org.slf4j" name="slf4j-api" rev="1.6.4" transitive="false"/>
-        <dependency org="org.slf4j" name="slf4j-log4j12" rev="1.6.4" transitive="false"/><%
+        <dependency org="org.hibernate" name="hibernate-validator" rev="3.1.0.GA" transitive="false"/><%
 	} else {%>
 		<dependency org="javax.validation" name="validation-api" rev="1.0.0.GA" transitive="false"/>
         <dependency org="org.graniteds" name="granite-beanvalidation" rev="2.3.0.GA" transitive="false"/>
-        <dependency org="org.hibernate" name="hibernate-validator" rev="4.2.0.Final" transitive="false"/>
-        <dependency org="org.slf4j" name="slf4j-api" rev="1.6.4" transitive="false"/>
-        <dependency org="org.slf4j" name="slf4j-log4j12" rev="1.6.4" transitive="false"/><%
+        <dependency org="org.hibernate" name="hibernate-validator" rev="4.2.0.Final" transitive="false"/><%
 	}%>
+    	<dependency org="org.slf4j" name="slf4j-api" rev="1.6.4" transitive="false"/>
+    	<dependency org="org.slf4j" name="slf4j-log4j12" rev="1.6.4" transitive="false"/>
     </dependencies>
     <conflicts>
     	<manager name="all"/>
