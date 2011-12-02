@@ -52,7 +52,7 @@
     ]]>
     </fx:Script>
 
-    <s:Panel title="Log in">
+    <s:Panel title="Log in (admin:admin or user:user)">
         <s:Form>
             <s:FormItem label="Username">
                 <s:TextInput id="username"/>
