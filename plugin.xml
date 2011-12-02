@@ -14,7 +14,7 @@
 			category="org.granite.wizard"
 			project="true"
 			icon="bin/icons/gds16.gif">
-			<description>New GraniteDS Projects</description>
+			<description>Create a new GraniteDS Project</description>
 	    </wizard>	 
 	  	<!--primaryWizard
 			id="org.granite.wizards.standard.NewProjectWizard"/-->	 
