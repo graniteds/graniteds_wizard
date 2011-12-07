@@ -44,12 +44,14 @@ import org.granite.wizard.util.PropertiesUtil;
 public class DefaultRepository implements Repository {
 
 	public static final String REPOSITORY_DIRECTORY = "repository";
+	public static final String TMP_DIRECTORY = "tmp";
 	public static final String REPOSITORY_FILE = "index.properties";
 	
 	protected DynamicProjectWizard wizard = null;
 	protected ProjectTemplate template = null;
 	
 	protected File repositoryDir = null;
+	protected File repositoryTmpDir = null;
 	protected Properties repositoryIndex;
 	
 	@Override
@@ -61,6 +63,12 @@ public class DefaultRepository implements Repository {
 		if (!repositoryDir.exists()) {
 			if (!repositoryDir.mkdirs())
 				throw new RuntimeException("Could not create repository directory: " + repositoryDir);
+		}
+		
+		repositoryTmpDir = new File(repositoryDir, TMP_DIRECTORY);
+		if (!repositoryTmpDir.exists()) {
+			if (!repositoryTmpDir.mkdirs())
+				throw new RuntimeException("Could not create repository temporary directory: " + repositoryTmpDir);
 		}
 		
 		try {
@@ -163,7 +171,7 @@ public class DefaultRepository implements Repository {
 			URLConnection conn = url.openConnection();
 			is = conn.getInputStream();
 
-			file = File.createTempFile("gds", "wiz");
+			file = File.createTempFile("gds", "wiz", repositoryTmpDir);
 			os = new BufferedOutputStream(new FileOutputStream(file));
 
 			int b;
