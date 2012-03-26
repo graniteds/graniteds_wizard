@@ -22,6 +22,7 @@ package org.granite.wizard;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +106,7 @@ public class DynamicProjectWizardPageOne extends WizardPage {
 		try {
 			URL url = getClass().getClassLoader().getResource(TEMPLATES);
 			url = FileLocator.resolve(url);
-			templatesDirectory = new File(url.toURI());
+			templatesDirectory = new File(new URI(url.toString().replace(" ", "%20")));
 		} catch (Exception e) {
 			throw new WizardException("Cannot resolve directory: " + TEMPLATES, e);
 		}
