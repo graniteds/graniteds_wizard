@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.granite.wizard;singleton:=true
-Bundle-Version: 2.3.2.GA
+Bundle-Version: 2.3.2.GA_U1
 Bundle-Activator: org.granite.wizard.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
