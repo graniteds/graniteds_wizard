@@ -40,7 +40,7 @@ class Fs {
 Fs;
 
 // GraniteDS version.
-GRANITEDS_VERSION = "3.0.0.M1";
+GRANITEDS_VERSION = "3.0.0.M2";
 
 // URL prefix for downloading Maven artifacts.
 DEFAULT_MAVEN_REPOSITORY = "http://repo2.maven.org/maven2/";
